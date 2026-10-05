@@ -25,7 +25,7 @@
 
         <javafx.version>21.0.4</javafx.version>
         <jackson.version>2.17.2</jackson.version>
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.42</lombok.version>
         <mysql.version>8.4.0</mysql.version>
         <hikari.version>5.1.0</hikari.version>
         <slf4j.version>2.0.16</slf4j.version>
