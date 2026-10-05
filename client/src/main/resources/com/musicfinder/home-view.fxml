@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.musicfinder.controller.HomeController"
+      stylesheets="@css/home.css"
+      styleClass="home-root">
+
+    <!-- SIDEBAR -->
+    <VBox prefWidth="208" minWidth="208" maxWidth="208" styleClass="sidebar">
+        <padding>
+            <Insets top="28" right="14" bottom="22" left="14" />
+        </padding>
+
+        <HBox spacing="9" alignment="CENTER_LEFT" styleClass="sidebar-brand-row">
+            <StackPane prefWidth="38" prefHeight="38" maxWidth="38" maxHeight="38" styleClass="sidebar-logo-box">
+                <Label text="▰▰" styleClass="sidebar-logo-symbol" />
+            </StackPane>
+            <Label text="musicfinder." styleClass="sidebar-brand-name" />
+        </HBox>
+
+        <Label text="YOUR SPACE" styleClass="sidebar-section-label">
+            <VBox.margin>
+                <Insets top="34" bottom="10" left="12" />
+            </VBox.margin>
+        </Label>
+
+        <Button text="Home" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" styleClass="nav-button, nav-active">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10" styleClass="nav-icon" /></Group></graphic></Button>
+        <Button text="Search" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoToSearch" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3" styleClass="nav-icon" /></Group></graphic></Button>
+        <Button text="Artists" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoToArtists" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75" styleClass="nav-icon" /></Group></graphic></Button>
+        <Button text="My Playlists" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoToPlaylists" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M11 12H3 M16 6H3 M16 18H3 M18 9v6 M21 12h-6" styleClass="nav-icon" /></Group></graphic></Button>
+
+        <HBox alignment="CENTER_LEFT" styleClass="nav-row">
+            <Button text="Favorites" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS" onAction="#handleGoFavorites" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z" styleClass="nav-icon" /></Group></graphic></Button>
+            <Label text="3" styleClass="count-badge" />
+        </HBox>
+
+        <Button text="Search History" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoSearchHistory" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 6v6l4 2" styleClass="nav-icon" /></Group></graphic></Button>
+        <Button text="Trending" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoTrending" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M22 7l-8.5 8.5-5-5L2 17 M16 7h6v6" styleClass="nav-icon" /></Group></graphic></Button>
+        <Button text="Profile" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleGoProfile" styleClass="nav-button">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2 M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" styleClass="nav-icon" /></Group></graphic></Button>
+
+        <Region VBox.vgrow="ALWAYS" />
+
+        <VBox spacing="7" styleClass="sidebar-promo">
+            <StackPane prefWidth="32" prefHeight="32" maxWidth="32" maxHeight="32" styleClass="promo-icon-box">
+                <Group scaleX="0.8" scaleY="0.8"><SVGPath content="M9 18V5l12-2v13 M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0z M21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" styleClass="promo-svg" /></Group>
+            </StackPane>
+            <Label text="THE SOUND OF YOU" styleClass="promo-eyebrow" />
+            <Label text="Find your next favorite." styleClass="promo-title" />
+            <Button text="Explore music  →" onAction="#handleExplore" styleClass="promo-link" />
+        </VBox>
+
+        <Button text="Settings" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleNavPlaceholder" styleClass="nav-button, bottom-nav">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" styleClass="nav-icon" /></Group></graphic>
+            <VBox.margin>
+                <Insets top="14" />
+            </VBox.margin>
+        </Button>
+        <Button text="Log out" graphicTextGap="12" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#handleLogout" styleClass="nav-button, bottom-nav">
+            <graphic><Group scaleX="0.68" scaleY="0.68"><SVGPath content="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" styleClass="nav-icon" /></Group></graphic></Button>
+    </VBox>
+
+    <!-- MAIN APP AREA -->
+    <BorderPane HBox.hgrow="ALWAYS" styleClass="main-shell">
+        <top>
+            <HBox alignment="CENTER_LEFT" prefHeight="64" minHeight="64" styleClass="topbar">
+                <padding>
+                    <Insets top="0" right="28" bottom="0" left="32" />
+                </padding>
+                <Label text="MUSIC FINDER" styleClass="topbar-muted" />
+                <Label text="/" styleClass="topbar-slash" />
+                <Label text="Discover" styleClass="topbar-current" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label text="INTERACTIVE PROTOTYPE" styleClass="topbar-muted" />
+                <HBox alignment="CENTER" spacing="6" styleClass="server-pill">
+                    <Label text="●" styleClass="server-dot" />
+                    <Label text="Server Connected" styleClass="server-text" />
+                </HBox>
+                <Separator orientation="VERTICAL" prefHeight="22" styleClass="top-separator" />
+                <StackPane prefWidth="34" prefHeight="34" maxWidth="34" maxHeight="34" styleClass="avatar-small">
+                    <Label text="AM" styleClass="avatar-small-text" />
+                </StackPane>
+            </HBox>
+        </top>
+
+        <center>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" styleClass="content-scroll">
+                <content>
+                    <VBox spacing="24" styleClass="page-content">
+                        <padding>
+                            <Insets top="34" right="32" bottom="36" left="32" />
+                        </padding>
+
+                        <VBox spacing="4">
+                            <Label text="TUESDAY, SEPTEMBER 30" styleClass="date-label" />
+                            <HBox alignment="BASELINE_LEFT" spacing="6">
+                                <Label text="Good afternoon," styleClass="welcome-title" />
+                                <Label text="Alex." styleClass="welcome-name" />
+                            </HBox>
+                            <Label text="Here’s what’s happening in your world of music." styleClass="welcome-subtitle" />
+                        </VBox>
+
+                        <!-- HERO -->
+                        <HBox minHeight="190" prefHeight="190" maxHeight="190" styleClass="hero-card">
+                            <padding>
+                                <Insets top="22" right="30" bottom="22" left="34" />
+                            </padding>
+                            <VBox spacing="7" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                                <Label text="●  FEATURED DISCOVERY" styleClass="hero-badge" />
+                                <Label text="Feel everything.\nFind your sound." styleClass="hero-heading" />
+                                <Label text="From the songs you know by heart to the ones you haven’t met yet. Your next discovery starts here."
+                                       wrapText="true" maxWidth="440" styleClass="hero-copy" />
+                                <Button text="Explore songs  →" onAction="#handleExplore" styleClass="hero-button" />
+                            </VBox>
+                            <StackPane prefWidth="330" minWidth="300" maxHeight="190" styleClass="hero-art-area">
+                                <StackPane prefWidth="270" prefHeight="270" maxWidth="270" maxHeight="270" styleClass="vinyl-ring, vinyl-ring-outer" />
+                                <StackPane prefWidth="210" prefHeight="210" maxWidth="210" maxHeight="210" styleClass="vinyl-ring, vinyl-ring-inner" />
+                                <ImageView fitWidth="150" fitHeight="150" preserveRatio="false" rotate="8" styleClass="hero-cover">
+                                    <image>
+                                        <Image url="@assets/cover-blue-flower.png" />
+                                    </image>
+                                </ImageView>
+                                <VBox alignment="CENTER_LEFT" maxWidth="150" spacing="3" styleClass="hero-now-playing" translateX="78" translateY="52">
+                                    <Label text="NOW DISCOVERING" styleClass="mini-eyebrow" />
+                                    <Label text="Có Chắc Yêu Là Đây" styleClass="mini-title" />
+                                    <Label text="Sơn Tùng M-TP" styleClass="mini-subtitle" />
+                                </VBox>
+                            </StackPane>
+                        </HBox>
+
+                        <!-- SEARCH -->
+                        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="home-search-bar">
+                            <Group scaleX="0.75" scaleY="0.75"><SVGPath content="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16z M21 21l-4.3-4.3" styleClass="field-icon" /></Group>
+                            <TextField fx:id="searchField" promptText="Search for songs or Vietnamese artists..." onAction="#handleSearch" HBox.hgrow="ALWAYS" styleClass="home-search-field" />
+                            <Button text="Search   →" onAction="#handleSearch" styleClass="search-button" />
+                        </HBox>
+                        <Label fx:id="homeMessageLabel" text="" styleClass="home-message" />
+
+                        <!-- RECENT -->
+                        <HBox alignment="CENTER_LEFT">
+                            <VBox spacing="2">
+                                <Label text="Recently searched" styleClass="section-title" />
+                                <Label text="Pick up where you left off" styleClass="section-subtitle" />
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button text="View history  →" onAction="#handleGoSearchHistory" styleClass="section-link" />
+                        </HBox>
+
+                        <HBox spacing="14">
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image">
+                                    <image><Image url="@assets/cover-blue-flower.png" /></image>
+                                </ImageView>
+                                <Label text="Có Chắc Yêu Là Đây" styleClass="card-title" />
+                                <Label text="Sơn Tùng M-TP" styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image">
+                                    <image><Image url="@assets/cover-concert.png" /></image>
+                                </ImageView>
+                                <Label text="Waiting For You" styleClass="card-title" />
+                                <Label text="MONO" styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image">
+                                    <image><Image url="@assets/cover-neon.png" /></image>
+                                </ImageView>
+                                <Label text="Bước Qua Mùa Cô Đơn" styleClass="card-title" />
+                                <Label text="Vũ." styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image">
+                                    <image><Image url="@assets/cover-red-flower.png" /></image>
+                                </ImageView>
+                                <Label text="See Tình" styleClass="card-title" />
+                                <Label text="Hoàng Thùy Linh" styleClass="card-subtitle" />
+                            </VBox>
+                        </HBox>
+
+                        <!-- POPULAR + ARTISTS -->
+                        <HBox spacing="18">
+                            <VBox spacing="10" HBox.hgrow="ALWAYS">
+                                <HBox alignment="CENTER_LEFT">
+                                    <VBox spacing="2">
+                                        <Label text="Popular right now" styleClass="section-title" />
+                                        <Label text="What everyone is looking for" styleClass="section-subtitle" />
+                                    </VBox>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button text="See all  →" onAction="#handleNavPlaceholder" styleClass="section-link" />
+                                </HBox>
+                                <VBox styleClass="popular-list">
+                                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="popular-row">
+                                        <Label text="01" styleClass="rank-number" />
+                                        <ImageView fitWidth="34" fitHeight="34" preserveRatio="false"><image><Image url="@assets/cover-blue-flower.png" /></image></ImageView>
+                                        <VBox spacing="1"><Label text="Có Chắc Yêu Là Đây" styleClass="list-title" /><Label text="Sơn Tùng M-TP" styleClass="list-subtitle" /></VBox>
+                                        <Region HBox.hgrow="ALWAYS" /><Label text="12.8k searches" styleClass="list-meta" /><Group scaleX="0.5" scaleY="0.5"><SVGPath content="M6 3l14 9-14 9z" styleClass="list-play-svg" /></Group>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="popular-row">
+                                        <Label text="02" styleClass="rank-number" />
+                                        <ImageView fitWidth="34" fitHeight="34" preserveRatio="false"><image><Image url="@assets/cover-concert.png" /></image></ImageView>
+                                        <VBox spacing="1"><Label text="Chắc Ai Đó Sẽ Về" styleClass="list-title" /><Label text="Sơn Tùng M-TP" styleClass="list-subtitle" /></VBox>
+                                        <Region HBox.hgrow="ALWAYS" /><Label text="10.4k searches" styleClass="list-meta" /><Group scaleX="0.5" scaleY="0.5"><SVGPath content="M6 3l14 9-14 9z" styleClass="list-play-svg" /></Group>
+                                    </HBox>
+                                    <HBox alignment="CENTER_LEFT" spacing="10" styleClass="popular-row, last-row">
+                                        <Label text="03" styleClass="rank-number" />
+                                        <ImageView fitWidth="34" fitHeight="34" preserveRatio="false"><image><Image url="@assets/cover-neon.png" /></image></ImageView>
+                                        <VBox spacing="1"><Label text="Nơi Này Có Anh" styleClass="list-title" /><Label text="Sơn Tùng M-TP" styleClass="list-subtitle" /></VBox>
+                                        <Region HBox.hgrow="ALWAYS" /><Label text="9.7k searches" styleClass="list-meta" /><Group scaleX="0.5" scaleY="0.5"><SVGPath content="M6 3l14 9-14 9z" styleClass="list-play-svg" /></Group>
+                                    </HBox>
+                                </VBox>
+                            </VBox>
+
+                            <VBox spacing="10" prefWidth="420" minWidth="360">
+                                <HBox alignment="CENTER_LEFT">
+                                    <VBox spacing="2">
+                                        <Label text="Trending artists" styleClass="section-title" />
+                                        <Label text="Artists making waves" styleClass="section-subtitle" />
+                                    </VBox>
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Button text="Explore artists  →" onAction="#handleGoToArtists" styleClass="section-link" />
+                                </HBox>
+                                <HBox spacing="9">
+                                    <VBox alignment="CENTER" spacing="6" HBox.hgrow="ALWAYS" styleClass="artist-card">
+                                        <StackPane prefWidth="52" prefHeight="52" maxWidth="52" maxHeight="52" styleClass="artist-avatar, purple-avatar"><ImageView fitWidth="50" fitHeight="50" preserveRatio="false"><clip><Circle radius="25" centerX="25" centerY="25" /></clip><image><Image url="@assets/art-son-tung.png" /></image></ImageView></StackPane>
+                                        <Label text="Sơn Tùng M-TP" styleClass="artist-name" />
+                                        <Label text="24.5k searches" styleClass="artist-meta" />
+                                    </VBox>
+                                    <VBox alignment="CENTER" spacing="6" HBox.hgrow="ALWAYS" styleClass="artist-card">
+                                        <StackPane prefWidth="52" prefHeight="52" maxWidth="52" maxHeight="52" styleClass="artist-avatar, dark-avatar"><ImageView fitWidth="50" fitHeight="50" preserveRatio="false"><clip><Circle radius="25" centerX="25" centerY="25" /></clip><image><Image url="@assets/art-hoang-thuy-linh.png" /></image></ImageView></StackPane>
+                                        <Label text="Hoàng Thùy Linh" styleClass="artist-name" />
+                                        <Label text="18.2k searches" styleClass="artist-meta" />
+                                    </VBox>
+                                    <VBox alignment="CENTER" spacing="6" HBox.hgrow="ALWAYS" styleClass="artist-card">
+                                        <StackPane prefWidth="52" prefHeight="52" maxWidth="52" maxHeight="52" styleClass="artist-avatar, blue-avatar"><ImageView fitWidth="50" fitHeight="50" preserveRatio="false"><clip><Circle radius="25" centerX="25" centerY="25" /></clip><image><Image url="@assets/art-mono.jpg" /></image></ImageView></StackPane>
+                                        <Label text="MONO" styleClass="artist-name" />
+                                        <Label text="15.8k searches" styleClass="artist-meta" />
+                                    </VBox>
+                                </HBox>
+                            </VBox>
+                        </HBox>
+
+                        <!-- RECOMMENDED -->
+                        <HBox alignment="CENTER_LEFT">
+                            <VBox spacing="2">
+                                <Label text="Recommended for you" styleClass="section-title" />
+                                <Label text="Inspired by your recent searches" styleClass="section-subtitle" />
+                            </VBox>
+                            <Region HBox.hgrow="ALWAYS" />
+                            <Button text="Search more  →" onAction="#handleGoToSearch" styleClass="section-link" />
+                        </HBox>
+
+                        <HBox spacing="14">
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card, large-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image"><image><Image url="@assets/cover-lanterns.png" /></image></ImageView>
+                                <Label text="Bước Qua Mùa Cô Đơn" styleClass="card-title" /><Label text="Vũ." styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card, large-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image"><image><Image url="@assets/cover-red-flower.png" /></image></ImageView>
+                                <Label text="See Tình" styleClass="card-title" /><Label text="Hoàng Thùy Linh" styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card, large-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image"><image><Image url="@assets/cover-bokeh.png" /></image></ImageView>
+                                <Label text="Để Mị Nói Cho Mà Nghe" styleClass="card-title" /><Label text="Hoàng Thùy Linh" styleClass="card-subtitle" />
+                            </VBox>
+                            <VBox spacing="7" HBox.hgrow="ALWAYS" styleClass="song-card, large-card">
+                                <ImageView fitWidth="190" fitHeight="170" preserveRatio="false" styleClass="card-image"><image><Image url="@assets/cover-flowers.png" /></image></ImageView>
+                                <Label text="Lạc Trôi" styleClass="card-title" /><Label text="Sơn Tùng M-TP" styleClass="card-subtitle" />
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </center>
+
+        <!-- FIXED PLAYER BAR -->
+        <bottom>
+            <HBox alignment="CENTER_LEFT" prefHeight="76" minHeight="76" styleClass="player-bar">
+                <padding>
+                    <Insets top="9" right="25" bottom="9" left="20" />
+                </padding>
+                <ImageView fitWidth="40" fitHeight="40" preserveRatio="false" styleClass="player-cover"><image><Image url="@assets/cover-blue-flower.png" /></image></ImageView>
+                <VBox spacing="2" prefWidth="210">
+                    <Label text="Có Chắc Yêu Là Đây" styleClass="player-title" />
+                    <Label text="Sơn Tùng M-TP" styleClass="player-subtitle" />
+                </VBox>
+                <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7z" styleClass="player-heart-svg" /></Group>
+                <Region prefWidth="45" />
+                <VBox alignment="CENTER" HBox.hgrow="ALWAYS" spacing="5">
+                    <HBox alignment="CENTER" spacing="16">
+                        <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M16 3h5v5 M4 20L21 3 M21 16v5h-5 M15 15l6 6 M4 4l5 5" styleClass="control-svg" /></Group>
+                        <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M19 20L9 12l10-8z M5 19V5" styleClass="control-svg" /></Group>
+                        <StackPane prefWidth="36" prefHeight="36" maxWidth="36" maxHeight="36" styleClass="play-circle"><Group scaleX="0.5" scaleY="0.5"><SVGPath content="M6 3l14 9-14 9z" styleClass="play-svg" /></Group></StackPane>
+                        <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M5 4l10 8-10 8z M19 5v14" styleClass="control-svg" /></Group>
+                        <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M17 2l4 4-4 4 M3 11v-1a4 4 0 0 1 4-4h14 M7 22l-4-4 4-4 M21 13v1a4 4 0 0 1-4 4H3" styleClass="control-svg" /></Group>
+                    </HBox>
+                    <HBox alignment="CENTER" spacing="8">
+                        <Label text="0:56" styleClass="time-label" />
+                        <StackPane prefWidth="420" prefHeight="4" maxHeight="4" styleClass="progress-track">
+                            <Region prefWidth="150" maxWidth="150" prefHeight="4" StackPane.alignment="CENTER_LEFT" styleClass="progress-fill" />
+                            <StackPane prefWidth="8" prefHeight="8" maxWidth="8" maxHeight="8" translateX="-60" styleClass="progress-knob" />
+                        </StackPane>
+                        <Label text="3:22" styleClass="time-label" />
+                    </HBox>
+                </VBox>
+                <Region prefWidth="45" />
+                <Group scaleX="0.62" scaleY="0.62"><SVGPath content="M11 5L6 9H2v6h4l5 4z M15.54 8.46a5 5 0 0 1 0 7.07 M19.07 4.93a10 10 0 0 1 0 14.14" styleClass="control-svg" /></Group>
+                <StackPane prefWidth="85" prefHeight="4" maxHeight="4" styleClass="progress-track">
+                    <Region prefWidth="55" maxWidth="55" prefHeight="4" StackPane.alignment="CENTER_LEFT" styleClass="progress-fill" />
+                    <StackPane prefWidth="8" prefHeight="8" maxWidth="8" maxHeight="8" translateX="15" styleClass="progress-knob" />
+                </StackPane>
+                <Label text="72%" styleClass="time-label" />
+            </HBox>
+        </bottom>
+    </BorderPane>
+</HBox>

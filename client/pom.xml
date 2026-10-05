@@ -48,6 +48,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
 
@@ -77,7 +78,7 @@
                 <version>0.0.8</version>
                 <configuration>
                     <!-- Change when your JavaFX Application class is created -->
-                    <mainClass>com.musicfinder.client.MusicFinderApplication</mainClass>
+                    <mainClass>com.musicfinder.MainApp</mainClass>
                 </configuration>
             </plugin>
         </plugins>
