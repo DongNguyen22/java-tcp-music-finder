@@ -14,6 +14,21 @@
     <artifactId>server</artifactId>
     <name>Music Finder - Server</name>
 
+<!--Cấu hình file thực thi chính của server hiệp thêm-->
+    <build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>3.6.4</version>
+            <configuration>
+                <!-- Điền đường dẫn đầy đủ đến class chứa hàm main -->
+                <mainClass>com.musicfinder.server.ServerApplication</mainClass>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
     <dependencies>
         <!-- Shared DTOs + request/response protocol -->
         <dependency>
@@ -26,6 +41,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL JDBC Driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
 
         <!-- MySQL JDBC driver -->
