@@ -1,35 +1,51 @@
 package com.musicfinder.controller;
 
-import com.musicfinder.MainApp;
+import com.musicfinder.navigation.Navigator;
+import com.musicfinder.navigation.Screen;
+
+import com.musicfinder.network.ClientConnection;
+import com.musicfinder.shared.enums.Action;
+import com.musicfinder.shared.request.Request;
+
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 
 public class SearchHistoryController {
 
-    @FXML private HBox historyRoot;
-    @FXML private VBox historyTable;
-    @FXML private Label historyMessageLabel;
-    @FXML private HBox songRowOne;
-    @FXML private HBox artistRowOne;
-    @FXML private HBox songRowTwo;
-    @FXML private HBox artistRowTwo;
-    @FXML private Button allTabButton;
-    @FXML private Button songsTabButton;
-    @FXML private Button artistsTabButton;
+    @FXML
+    private HBox historyRoot;
+    @FXML
+    private VBox historyTable;
+    @FXML
+    private Label historyMessageLabel;
+    @FXML
+    private HBox songRowOne;
+    @FXML
+    private HBox artistRowOne;
+    @FXML
+    private HBox songRowTwo;
+    @FXML
+    private HBox artistRowTwo;
+    @FXML
+    private Button allTabButton;
+    @FXML
+    private Button songsTabButton;
+    @FXML
+    private Button artistsTabButton;
 
     @FXML
-    private void initialize() {
+    private void initialize() throws IOException {
+
         historyMessageLabel.setText("");
-        showAll();
+
+        Request request = Request.of(Action.GET_HISTORY, null);
+
+        ClientConnection.getInstance().send(request);
     }
 
     @FXML
@@ -63,51 +79,51 @@ public class SearchHistoryController {
     }
 
     @FXML
-    private void handleClearHistory() {
-        historyTable.setVisible(false);
-        historyTable.setManaged(false);
-        historyMessageLabel.setText("Search history cleared in this UI demo. It will reset when the app restarts.");
+    private void handleClearHistory() throws IOException {
+
+        Request request = Request.of(Action.CLEAR_HISTORY, null);
+
+        ClientConnection.getInstance().send(request);
     }
 
     @FXML
     private void handleSearchAgain() throws IOException {
-        switchScreen("/com/musicfinder/search-view.fxml", "Music Finder - Search");
+        Navigator.goTo(Screen.SEARCH);
     }
 
     @FXML
     private void handleGoHome() throws IOException {
-        switchScreen("/com/musicfinder/home-view.fxml", "Music Finder - Home");
+        Navigator.goTo(Screen.HOME);
     }
 
     @FXML
     private void handleGoSearch() throws IOException {
-        switchScreen("/com/musicfinder/search-view.fxml", "Music Finder - Search");
+        Navigator.goTo(Screen.SEARCH);
     }
 
     @FXML
     private void handleGoArtists() throws IOException {
-        switchScreen("/com/musicfinder/artists-view.fxml", "Music Finder - Artists");
+        Navigator.goTo(Screen.ARTISTS);
     }
 
     @FXML
     private void handleGoPlaylists() throws IOException {
-        switchScreen("/com/musicfinder/my-playlists-view.fxml", "Music Finder - My Playlists");
+        Navigator.goTo(Screen.PLAYLISTS);
     }
 
     @FXML
     private void handleGoFavorites() throws IOException {
-        switchScreen("/com/musicfinder/favorites-view.fxml", "Music Finder - Favorites");
+        Navigator.goTo(Screen.FAVORITES);
     }
 
     @FXML
     private void handleGoTrending() throws IOException {
-        switchScreen("/com/musicfinder/trending-view.fxml", "Music Finder - Trending");
+        Navigator.goTo(Screen.TRENDING);
     }
-
 
     @FXML
     private void handleGoProfile() throws IOException {
-        switchScreen("/com/musicfinder/profile-view.fxml", "Music Finder - Profile");
+        Navigator.goTo(Screen.PROFILE);
     }
 
     @FXML
@@ -116,8 +132,18 @@ public class SearchHistoryController {
     }
 
     @FXML
-    private void handleLogout() throws IOException {
-        switchScreen("/com/musicfinder/login-view.fxml", "Music Finder - Login");
+    private void handleLogout() {
+
+        Request request = Request.of(Action.LOGOUT, null);
+
+        try {
+
+            ClientConnection.getInstance().send(request);
+
+        } catch (IOException e) {
+
+            // show message tùy màn hình
+        }
     }
 
     private void showAll() {
@@ -137,23 +163,12 @@ public class SearchHistoryController {
     }
 
     private void setActiveTab(Button activeButton) {
-        Button[] tabs = {allTabButton, songsTabButton, artistsTabButton};
+        Button[] tabs = { allTabButton, songsTabButton, artistsTabButton };
         for (Button tab : tabs) {
             tab.getStyleClass().remove("filter-tab-active");
         }
         if (!activeButton.getStyleClass().contains("filter-tab-active")) {
             activeButton.getStyleClass().add("filter-tab-active");
         }
-    }
-
-    private void switchScreen(String resource, String title) throws IOException {
-        Parent root = FXMLLoader.load(MainApp.class.getResource(resource));
-        Scene scene = historyRoot.getScene();
-        scene.setRoot(root);
-
-        Stage stage = (Stage) scene.getWindow();
-        stage.setTitle(title);
-        stage.setMinWidth(1100);
-        stage.setMinHeight(720);
     }
 }

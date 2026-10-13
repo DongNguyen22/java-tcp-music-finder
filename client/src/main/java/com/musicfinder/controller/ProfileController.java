@@ -1,13 +1,15 @@
 package com.musicfinder.controller;
 
-import com.musicfinder.MainApp;
+import com.musicfinder.navigation.Navigator;
+import com.musicfinder.navigation.Screen;
+
+import com.musicfinder.network.ClientConnection;
+import com.musicfinder.shared.enums.Action;
+import com.musicfinder.shared.request.Request;
+
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 
@@ -20,8 +22,13 @@ public class ProfileController {
     private Label profileMessageLabel;
 
     @FXML
-    private void initialize() {
+    private void initialize() throws IOException {
+
         profileMessageLabel.setText("");
+
+        Request request = Request.of(Action.GET_PROFILE, null);
+
+        ClientConnection.getInstance().send(request);
     }
 
     @FXML
@@ -36,37 +43,37 @@ public class ProfileController {
 
     @FXML
     private void handleGoHome() throws IOException {
-        switchScreen("/com/musicfinder/home-view.fxml", "Music Finder - Home");
+        Navigator.goTo(Screen.HOME);
     }
 
     @FXML
     private void handleGoSearch() throws IOException {
-        switchScreen("/com/musicfinder/search-view.fxml", "Music Finder - Search");
+        Navigator.goTo(Screen.SEARCH);
     }
 
     @FXML
     private void handleGoArtists() throws IOException {
-        switchScreen("/com/musicfinder/artists-view.fxml", "Music Finder - Artists");
+        Navigator.goTo(Screen.ARTISTS);
     }
 
     @FXML
     private void handleGoPlaylists() throws IOException {
-        switchScreen("/com/musicfinder/my-playlists-view.fxml", "Music Finder - My Playlists");
+        Navigator.goTo(Screen.PLAYLISTS);
     }
 
     @FXML
     private void handleGoFavorites() throws IOException {
-        switchScreen("/com/musicfinder/favorites-view.fxml", "Music Finder - Favorites");
+        Navigator.goTo(Screen.FAVORITES);
     }
 
     @FXML
     private void handleGoSearchHistory() throws IOException {
-        switchScreen("/com/musicfinder/search-history-view.fxml", "Music Finder - Search History");
+        Navigator.goTo(Screen.SEARCH_HISTORY);
     }
 
     @FXML
     private void handleGoTrending() throws IOException {
-        switchScreen("/com/musicfinder/trending-view.fxml", "Music Finder - Trending");
+        Navigator.goTo(Screen.TRENDING);
     }
 
     @FXML
@@ -80,19 +87,18 @@ public class ProfileController {
     }
 
     @FXML
-    private void handleLogout() throws IOException {
-        switchScreen("/com/musicfinder/login-view.fxml", "Music Finder - Login");
-    }
+    private void handleLogout() {
 
-    private void switchScreen(String resource, String title) throws IOException {
-        Parent root = FXMLLoader.load(MainApp.class.getResource(resource));
-        Scene scene = profileRoot.getScene();
-        scene.setRoot(root);
+        Request request = Request.of(Action.LOGOUT, null);
 
-        Stage stage = (Stage) scene.getWindow();
-        stage.setTitle(title);
-        stage.setMinWidth(1100);
-        stage.setMinHeight(720);
+        try {
+
+            ClientConnection.getInstance().send(request);
+
+        } catch (IOException e) {
+
+            // show message tùy màn hình
+        }
     }
 
     private void showMessage(String message) {
