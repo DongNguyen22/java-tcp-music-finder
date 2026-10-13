@@ -1,9 +1,8 @@
 package com.musicfinder;
 
+import com.musicfinder.navigation.Navigator;
+import com.musicfinder.navigation.Screen;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -12,17 +11,9 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(
-                MainApp.class.getResource("/com/musicfinder/login-view.fxml")
-        );
+        Navigator.initialize(stage);
+        Navigator.goTo(Screen.LOGIN);
 
-        Parent root = loader.load();
-        Scene scene = new Scene(root, 1200, 760);
-
-        stage.setTitle("Music Finder - Login");
-        stage.setMinWidth(1000);
-        stage.setMinHeight(680);
-        stage.setScene(scene);
         stage.centerOnScreen();
         stage.show();
     }

@@ -24,23 +24,23 @@ public class Response {
         return res;
     }
 
-    public static Response create(Request req, Status status, String message, Object data) {
-        Response res = new Response();
-        res.requestId = req.requestId;
-        res.action = req.action;
-        res.status = status;
-        res.message = message;
-        res.data = data;
-        return res;
-    }
+    // public static Response create(Request req, Status status, String message, Object data) {
+    //     Response res = new Response();
+    //     res.requestId = req.requestId;
+    //     res.action = req.action;
+    //     res.status = status;
+    //     res.message = message;
+    //     res.data = data;
+    //     return res;
+    // }
 
-    public static Response success(Request req, Object data) {
-        return create(req, Status.SUCCESS, "OK", data);
-    }
+    // public static Response success(Request req, Object data) {
+    //     return create(req, Status.SUCCESS, "OK", data);
+    // }
 
-    public static Response error(Request req, Status status, String message) {
-        return create(req, status, message, message);
-    }
+    // public static Response error(Request req, Status status, String message) {
+    //     return create(req, status, message, message);
+    // }
 
     @JsonIgnore
     public boolean isSuccess() {

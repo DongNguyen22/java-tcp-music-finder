@@ -1,11 +1,12 @@
 package com.musicfinder.controller;
 
-import com.musicfinder.MainApp;
+import com.musicfinder.network.ClientConnection;
+import com.musicfinder.shared.enums.Action;
+import com.musicfinder.shared.request.Request;
+import com.musicfinder.shared.request.payload.LoginPayload;
+
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -13,7 +14,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import javafx.stage.Stage;
 
 import java.io.IOException;
 
@@ -57,12 +57,12 @@ public class LoginController {
         passwordVisibleField.textProperty().bindBidirectional(passwordField.textProperty());
 
         // Viền tím sáng cho cả khung khi ô bên trong được focus
-        usernameField.focusedProperty().addListener((obs, was, now) ->
-                usernameBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
-        passwordField.focusedProperty().addListener((obs, was, now) ->
-                passwordBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
-        passwordVisibleField.focusedProperty().addListener((obs, was, now) ->
-                passwordBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
+        usernameField.focusedProperty()
+                .addListener((obs, was, now) -> usernameBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
+        passwordField.focusedProperty()
+                .addListener((obs, was, now) -> passwordBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
+        passwordVisibleField.focusedProperty()
+                .addListener((obs, was, now) -> passwordBox.pseudoClassStateChanged(FOCUSED_WITHIN, now));
     }
 
     @FXML
@@ -84,26 +84,31 @@ public class LoginController {
 
     @FXML
     private void handleLogin() throws IOException {
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText();
+
+        String username = usernameField.getText() == null
+                ? ""
+                : usernameField.getText().trim();
+
+        String password = passwordField.getText() == null ? ""
+                : passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            showMessage("Please enter your username/email and password.", false);
+            showMessage(
+                    "Please enter your username/email and password.",
+                    false);
+            if (username.isEmpty()) {
+                usernameField.requestFocus();
+            } else {
+                passwordField.requestFocus();
+            }
             return;
         }
 
-        // UI demo: any non-empty username/password navigates to Home.
-        Parent homeRoot = FXMLLoader.load(
-                MainApp.class.getResource("/com/musicfinder/home-view.fxml")
-        );
+        LoginPayload payload = new LoginPayload(username, password);
 
-        Scene scene = usernameField.getScene();
-        scene.setRoot(homeRoot);
+        Request request = Request.of(Action.LOGIN, payload);
 
-        Stage stage = (Stage) scene.getWindow();
-        stage.setTitle("Music Finder - Home");
-        stage.setMinWidth(1100);
-        stage.setMinHeight(720);
+        ClientConnection.getInstance().send(request);
     }
 
     @FXML
