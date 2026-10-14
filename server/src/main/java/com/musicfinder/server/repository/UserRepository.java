@@ -4,6 +4,8 @@ import com.musicfinder.server.config.DatabaseConfig;
 import com.musicfinder.server.model.Users;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserRepository {
@@ -25,22 +27,23 @@ public class UserRepository {
     }
 
     // tim theo ten nguoi dung
-    public Optional<Users> findByUsername(String username) {
-        String sql = "SELECT * "
-                + "FROM USERS WHERE username = ?";
+    public List<Users> findByUsername(String username) {
+        List<Users> users = new ArrayList<>();
+        String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 5";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, username); // thay vao dau ?
+            String pattern = "%" + username + "%";
+            ps.setString(1, pattern); // thay vao dau ?
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToUser(rs));
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
                 }
             }
         } catch (SQLException e) {
             System.out.println("Lỗi kết nối");
             e.printStackTrace();
         }
-        return Optional.empty();
+        return users;
     }
 
     // tim theo id user_id
@@ -92,30 +95,30 @@ public class UserRepository {
     }
 
     // them tai khoan moi
-    public Users save(Users user){
+    public Users save(Users user) {
         String sql = "INSERT INTO USERS (username,password_hash, full_name,email,avatar_url)"
-                        + "VALUES(?, ?, ?, ?, ?)";
-                         try (Connection conn = DatabaseConfig.getConnection();
-         PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-        ps.setString(1, user.getUsername());
-        ps.setString(2, user.getPasswordHash());
-        ps.setString(3, user.getFullName());
-        ps.setString(4, user.getEmail());
-        ps.setString(5, user.getAvatarUrl());
-        int affectedRows = ps.executeUpdate();
-        if(affectedRows > 0){
-            try(ResultSet generatedKeys = ps.getGeneratedKeys()){
-                if (generatedKeys.next()) {
-                    user.setUserId(generatedKeys.getLong(1));
+                + "VALUES(?, ?, ?, ?, ?)";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, user.getUsername());
+            ps.setString(2, user.getPasswordHash());
+            ps.setString(3, user.getFullName());
+            ps.setString(4, user.getEmail());
+            ps.setString(5, user.getAvatarUrl());
+            int affectedRows = ps.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        user.setUserId(generatedKeys.getLong(1));
+                    }
                 }
             }
-        }
-        return user;
-    }   catch (Exception e) {
+            return user;
+        } catch (Exception e) {
             e.printStackTrace();
-        throw new RuntimeException("Lỗi lưu người dùng: " + e.getMessage(),e); 
+            throw new RuntimeException("Lỗi lưu người dùng: " + e.getMessage(), e);
         }
-}
+    }
 
     // cap nhat thong thong tin user
     public boolean update(Users user) {

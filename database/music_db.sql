@@ -12,7 +12,7 @@
 --   3. PLAYLISTS                      (FK → USERS)
 --   4. PLAYLIST_SONGS                 (FK → PLAYLISTS, SONGS)
 --   5. SEARCH_HISTORY                 (FK → USERS)
---   6. SEARCH_CACHE, SEARCH_STATISTICS (độc lập, không có FK)
+--   6. SEARCH_CACHE, (độc lập, không có FK)
 
 -- =============================================================================
 -- 1. USERS
@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS ARTISTS (
     hometown        VARCHAR(255),
     biography       TEXT,
     image_url       TEXT,
+    search_count    BIGINT    DEFAULT 0 CHECK (search_count >= 0),
     created_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 );
@@ -60,6 +61,7 @@ CREATE TABLE IF NOT EXISTS SONGS (
     audio_url        TEXT,
     video_url        TEXT,
     thumbnail_url    TEXT,
+    search_count     BIGINT     DEFAULT 0 CHECK (search_count >= 0),
     created_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
 );
@@ -142,20 +144,6 @@ CREATE TABLE IF NOT EXISTS SEARCH_CACHE (
 );
 
 -- =============================================================================
--- 9. SEARCH_STATISTICS
--- Thống kê số lần tìm kiếm theo từ khóa.
--- Không có FK tới bảng khác theo thiết kế.
--- =============================================================================
-CREATE TABLE IF NOT EXISTS SEARCH_STATISTICS (
-    statistic_id       BIGSERIAL    PRIMARY KEY,
-    keyword            VARCHAR(255) NOT NULL,
-    normalized_keyword VARCHAR(255) NOT NULL,
-    search_type        VARCHAR(20)  NOT NULL,
-    search_count       BIGINT       DEFAULT 0 CHECK (search_count >= 0),
-    last_searched_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
-);
-
--- =============================================================================
 -- INDEXES
 -- Tạo index cho các FK và các trường thường xuyên tìm kiếm.
 -- =============================================================================
@@ -189,8 +177,7 @@ CREATE INDEX IF NOT EXISTS idx_search_cache_cache_key          ON SEARCH_CACHE(c
 CREATE INDEX IF NOT EXISTS idx_search_cache_expires_at         ON SEARCH_CACHE(expires_at);
 CREATE INDEX IF NOT EXISTS idx_search_cache_normalized_keyword ON SEARCH_CACHE(normalized_keyword);
 
--- SEARCH_STATISTICS
-CREATE INDEX IF NOT EXISTS idx_search_statistics_normalized_keyword ON SEARCH_STATISTICS(normalized_keyword);
+
 
 -- =============================================================================
 -- SEED DATA (tối thiểu, chỉ phục vụ test / demo)
@@ -247,10 +234,4 @@ INSERT INTO SEARCH_CACHE (cache_key, keyword, normalized_keyword, search_type, r
         '{"results": [{"id": "ext-song-001", "title": "Lac Troi"}]}',
         CURRENT_TIMESTAMP + INTERVAL '1 hour'
     )
-ON CONFLICT DO NOTHING;
-
--- Search statistics mẫu
-INSERT INTO SEARCH_STATISTICS (keyword, normalized_keyword, search_type, search_count) VALUES
-    ('Son Tung', 'son tung', 'SONG', 42),
-    ('My Tam',   'my tam',   'SONG', 17)
 ON CONFLICT DO NOTHING;
