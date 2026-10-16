@@ -26,14 +26,12 @@ public class UserRepository {
                 .build();
     }
 
-    // tim theo ten nguoi dung
     public List<Users> findByUsername(String username) {
         List<Users> users = new ArrayList<>();
-        String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 5";
+        String sql = "SELECT * FROM USERS WHERE username ILIKE ? LIMIT 5";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            String pattern = "%" + username + "%";
-            ps.setString(1, pattern); // thay vao dau ?
+            ps.setString(1, "%" + username + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     users.add(mapResultSetToUser(rs));
