@@ -26,22 +26,21 @@ public class UserRepository {
                 .build();
     }
 
-    public List<Users> findByUsername(String username) {
-        List<Users> users = new ArrayList<>();
-        String sql = "SELECT * FROM USERS WHERE username ILIKE ? LIMIT 5";
+    // tim theo ten nguoi dung
+    public Optional<Users> findByUsername(String username) {
+        String sql = "SELECT * FROM USERS WHERE username = ?";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + username + "%");
+            ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    users.add(mapResultSetToUser(rs));
+                if (rs.next()) {
+                    return Optional.of(mapResultSetToUser(rs));
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Lỗi kết nối");
-            e.printStackTrace();
+            System.out.println("Lỗi kết nối: " + e.getMessage());
         }
-        return users;
+        return Optional.empty();
     }
 
     // tim theo id user_id
