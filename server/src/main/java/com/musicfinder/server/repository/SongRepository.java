@@ -169,4 +169,23 @@ public class SongRepository {
         }
         return songs;
     }
+
+    public List<Songs> findByPlaylistId(Long playlistId) {
+        List<Songs> songs = new ArrayList<>();
+        String sql = "SELECT s.* FROM SONGS s "
+                   + "JOIN PLAYLIST_SONGS ps ON s.song_id = ps.song_id "
+                   + "WHERE ps.playlist_id = ? ORDER BY ps.position ASC";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, playlistId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    songs.add(mapResultSetToSong(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return songs;
+    }
 }
