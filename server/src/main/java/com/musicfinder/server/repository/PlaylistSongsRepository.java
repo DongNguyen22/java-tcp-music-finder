@@ -1,12 +1,15 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.PlaylistSongs;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class PlaylistSongsRepository {
 
     private PlaylistSongs mapResultSetToPlaylistSong(ResultSet rs) throws SQLException {
@@ -31,10 +34,11 @@ public class PlaylistSongsRepository {
                     list.add(mapResultSetToPlaylistSong(rs));
                 }
             }
+            return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi lấy bài hát của playlist [{}]: {}", playlistId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi lấy bài hát của playlist ID " + playlistId, e);
         }
-        return list;
     }
 
     public boolean addSong(Long playlistId, Long songId, Integer position) {
@@ -51,9 +55,9 @@ public class PlaylistSongsRepository {
             }
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi thêm bài hát [{}] vào playlist [{}]: {}", songId, playlistId, e.getMessage(), e);
+            throw new DataException("Lỗi thêm bài hát vào playlist ID " + playlistId, e);
         }
-        return false;
     }
 
     public boolean removeSong(Long playlistId, Long songId) {
@@ -64,10 +68,8 @@ public class PlaylistSongsRepository {
             ps.setLong(2, songId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi xóa bài hát [{}] khỏi playlist [{}]: {}", songId, playlistId, e.getMessage(), e);
+            throw new DataException("Lỗi xóa bài hát khỏi playlist ID " + playlistId, e);
         }
-        return false;
     }
-
-
 }

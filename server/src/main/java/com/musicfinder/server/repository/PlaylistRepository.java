@@ -1,13 +1,16 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.Playlists;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class PlaylistRepository {
 
     private Playlists mapResultSetToPlaylist(ResultSet rs) throws SQLException {
@@ -33,10 +36,11 @@ public class PlaylistRepository {
                 if (rs.next())
                     return Optional.of(mapResultSetToPlaylist(rs));
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm playlist theo ID [{}]: {}", playlistId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm playlist ID " + playlistId, e);
         }
-        return Optional.empty();
     }
 
     public List<Playlists> findByUserId(Long userId) {
@@ -50,10 +54,11 @@ public class PlaylistRepository {
                     playlists.add(mapResultSetToPlaylist(rs));
                 }
             }
+            return playlists;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm playlist theo user_id [{}]: {}", userId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm playlist theo user_id " + userId, e);
         }
-        return playlists;
     }
 
     public Playlists save(Playlists playlist) {
@@ -72,19 +77,21 @@ public class PlaylistRepository {
             }
             return playlist;
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi lưu playlist: " + e.getMessage(), e);
+            log.error("Lỗi lưu playlist [{}]: {}", playlist.getName(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu playlist " + playlist.getName(), e);
         }
     }
 
-    public boolean deleteById(Long playlistId) {
-        String sql = "DELETE FROM PLAYLISTS WHERE playlist_id = ?";
+    public boolean deleteById(Long playlistId, Long userid) {
+        String sql = "DELETE FROM PLAYLISTS WHERE playlist_id = ? AND user_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, playlistId);
+            ps.setLong(2, userid);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi xóa playlist [{}] của user [{}]: {}", playlistId, userid, e.getMessage(), e);
+            throw new DataException("Lỗi xóa playlist ID " + playlistId, e);
         }
-        return false;
     }
 }

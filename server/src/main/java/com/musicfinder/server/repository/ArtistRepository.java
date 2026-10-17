@@ -1,13 +1,16 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.Artists;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class ArtistRepository {
 
     // Ánh xạ ResultSet sang đối tượng Artists
@@ -42,10 +45,11 @@ public class ArtistRepository {
                     return Optional.of(mapResultSetToArtist(rs));
                 }
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            System.out.println("Loi ket noi" + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo ID [{}]: {}", artistId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm nghệ sĩ ID " + artistId, e);
         }
-        return Optional.empty();
     }
 
     //  Tìm theo external_id (kiểm tra trước khi sync API)
@@ -59,14 +63,15 @@ public class ArtistRepository {
                     return Optional.of(mapResultSetToArtist(rs));
                 }
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            System.out.println("Loi ket noi" + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo external_id [{}]: {}", externalId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo external_id " + externalId, e);
         }
-        return Optional.empty();
     }
 
     // Tìm kiếm nghệ sĩ theo tên (tìm gần đúng bằng ILIKE)
-    public List<Artists> findByName(String name) {
+    public List<Artists> searchByName(String name) {
         List<Artists> list = new ArrayList<>();
         String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 20";
         try (Connection conn = DatabaseConfig.getConnection();
@@ -79,10 +84,11 @@ public class ArtistRepository {
                     list.add(mapResultSetToArtist(rs));
                 }
             }
+            return list;
         } catch (SQLException e) {
-            System.out.println("Loi ket noi" + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo tên [{}]: {}", name, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo tên " + name, e);
         }
-        return list;
     }
 
     // Thêm mới nghệ sĩ
@@ -111,7 +117,8 @@ public class ArtistRepository {
             }
             return artist;
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi lưu nghệ sĩ: " + e.getMessage(), e);
+            log.error("Lỗi lưu nghệ sĩ [{}]: {}", artist.getArtistName(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu nghệ sĩ " + artist.getArtistName(), e);
         }
     }
 
@@ -133,9 +140,9 @@ public class ArtistRepository {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi cập nhật nghệ sĩ [{}]: {}", artist.getArtistId(), e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật nghệ sĩ ID " + artist.getArtistId(), e);
         }
-        return false;
     }
 
     //  Tăng số lần tìm kiếm
@@ -146,7 +153,8 @@ public class ArtistRepository {
             ps.setLong(1, artistId);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("Lỗi kết nối: " + e.getMessage());
+            log.error("Lỗi cập nhật lượt tìm kiếm nghệ sĩ [{}]: {}", artistId, e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật lượt tìm kiếm nghệ sĩ ID " + artistId, e);
         }
     }
 
