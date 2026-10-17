@@ -4,6 +4,8 @@ import com.musicfinder.server.config.DatabaseConfig;
 import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.Songs;
 import lombok.extern.slf4j.Slf4j;
+import com.musicfinder.server.util.TextNormalizer;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +40,8 @@ public class SongRepository {
         String sql = "SELECT * FROM SONGS WHERE title ILIKE ? OR normalized_title ILIKE ? LIMIT 20";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            String pattern = "%" + title + "%";
-            ps.setString(1, pattern);
-            ps.setString(2, pattern);
+            ps.setString(1, "%" + title + "%"); // tên gốc
+            ps.setString(2, "%" + TextNormalizer.normalize(title) + "%"); // tên đã chuẩn hoá
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     songs.add(mapResultSetToSong(rs));
@@ -101,13 +102,13 @@ public class SongRepository {
         }
     }
 
-    //Them bai hat moi 
-     public Songs save(Songs song) {
+    // Them bai hat moi
+    public Songs save(Songs song) {
         String sql = "INSERT INTO SONGS (external_id, title, normalized_title, composer, duration_seconds, "
-                   + "audio_url, video_url, thumbnail_url, search_count) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "audio_url, video_url, thumbnail_url, search_count) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, song.getExternalId());
             ps.setString(2, song.getTitle());
             ps.setString(3, song.getNormalizedTitle());
@@ -131,14 +132,15 @@ public class SongRepository {
             throw new DataException("Lỗi lưu bài hát " + song.getTitle(), e);
         }
     }
-     // Cập nhật thông tin bài hát
+
+    // Cập nhật thông tin bài hát
     public boolean update(Songs song) {
         String sql = "UPDATE SONGS SET external_id = ?, title = ?, normalized_title = ?, composer = ?, "
-                   + "duration_seconds = ?, audio_url = ?, video_url = ?, thumbnail_url = ?, "
-                   + "updated_at = CURRENT_TIMESTAMP " // <-- Tự động cập nhật thời gian sửa đổi
-                   + "WHERE song_id = ?";
+                + "duration_seconds = ?, audio_url = ?, video_url = ?, thumbnail_url = ?, "
+                + "updated_at = CURRENT_TIMESTAMP " // <-- Tự động cập nhật thời gian sửa đổi
+                + "WHERE song_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, song.getExternalId());
             ps.setString(2, song.getTitle());
             ps.setString(3, song.getNormalizedTitle());
@@ -155,14 +157,14 @@ public class SongRepository {
         }
     }
 
-    //Lay danh sach bai hat theo id artist
+    // Lay danh sach bai hat theo id artist
     public List<Songs> findByArtistId(Long artistId) {
         List<Songs> songs = new ArrayList<>();
         String sql = "SELECT s.* FROM SONGS s "
-                   + "JOIN SONG_ARTISTS sa ON s.song_id = sa.song_id "
-                   + "WHERE sa.artist_id = ?";
+                + "JOIN SONG_ARTISTS sa ON s.song_id = sa.song_id "
+                + "WHERE sa.artist_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, artistId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

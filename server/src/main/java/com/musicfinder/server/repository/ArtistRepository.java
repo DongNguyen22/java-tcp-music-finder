@@ -4,6 +4,7 @@ import com.musicfinder.server.config.DatabaseConfig;
 import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.Artists;
 import lombok.extern.slf4j.Slf4j;
+import com.musicfinder.server.util.TextNormalizer;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class ArtistRepository {
     public Optional<Artists> findById(Long artistId) {
         String sql = "SELECT * FROM ARTISTS WHERE artist_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, artistId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -52,11 +53,11 @@ public class ArtistRepository {
         }
     }
 
-    //  Tìm theo external_id (kiểm tra trước khi sync API)
+    // Tìm theo external_id (kiểm tra trước khi sync API)
     public Optional<Artists> findByExternalId(String externalId) {
         String sql = "SELECT * FROM ARTISTS WHERE external_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, externalId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -73,12 +74,11 @@ public class ArtistRepository {
     // Tìm kiếm nghệ sĩ theo tên (tìm gần đúng bằng ILIKE)
     public List<Artists> searchByName(String name) {
         List<Artists> list = new ArrayList<>();
-        String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 20";
+        String sql = "SELECT * FROM SONGS WHERE title ILIKE ? OR normalized_title ILIKE ? LIMIT 20";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            String pattern = "%" + name + "%";
-            ps.setString(1, pattern);
-            ps.setString(2, pattern);
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + name + "%"); // tên gốc
+            ps.setString(2, "%" + TextNormalizer.normalize(name) + "%"); // tên đã chuẩn hoá
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     list.add(mapResultSetToArtist(rs));
@@ -94,10 +94,10 @@ public class ArtistRepository {
     // Thêm mới nghệ sĩ
     public Artists save(Artists artist) {
         String sql = "INSERT INTO ARTISTS (external_id, name, normalized_name, birth_date, hometown, "
-                   + "biography, image_url, search_count) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "biography, image_url, search_count) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, artist.getExternalId());
             ps.setString(2, artist.getArtistName());
             ps.setString(3, artist.getNormalizedName());
@@ -122,13 +122,13 @@ public class ArtistRepository {
         }
     }
 
-    //  Cập nhật thông tin nghệ sĩ
+    // Cập nhật thông tin nghệ sĩ
     public boolean update(Artists artist) {
         String sql = "UPDATE ARTISTS SET external_id = ?, name = ?, normalized_name = ?, birth_date = ?, "
-                   + "hometown = ?, biography = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP "
-                   + "WHERE artist_id = ?";
+                + "hometown = ?, biography = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP "
+                + "WHERE artist_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, artist.getExternalId());
             ps.setString(2, artist.getArtistName());
             ps.setString(3, artist.getNormalizedName());
@@ -145,11 +145,11 @@ public class ArtistRepository {
         }
     }
 
-    //  Tăng số lần tìm kiếm
+    // Tăng số lần tìm kiếm
     public void updateSearchCount(Long artistId) {
         String sql = "UPDATE ARTISTS SET search_count = search_count + 1 WHERE artist_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, artistId);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -160,21 +160,21 @@ public class ArtistRepository {
 
     // // Lấy danh sách nghệ sĩ của một bài hát (JOIN SONG_ARTISTS)
     // public List<Artists> findBySongId(Long songId) {
-    //     List<Artists> artists = new ArrayList<>();
-    //     String sql = "SELECT a.* FROM ARTISTS a "
-    //                + "JOIN SONG_ARTISTS sa ON a.artist_id = sa.artist_id "
-    //                + "WHERE sa.song_id = ?";
-    //     try (Connection conn = DatabaseConfig.getConnection();
-    //          PreparedStatement ps = conn.prepareStatement(sql)) {
-    //         ps.setLong(1, songId);
-    //         try (ResultSet rs = ps.executeQuery()) {
-    //             while (rs.next()) {
-    //                 artists.add(mapResultSetToArtist(rs));
-    //             }
-    //         }
-    //     } catch (SQLException e) {
-    //         e.printStackTrace();
-    //     }
-    //     return artists;
+    // List<Artists> artists = new ArrayList<>();
+    // String sql = "SELECT a.* FROM ARTISTS a "
+    // + "JOIN SONG_ARTISTS sa ON a.artist_id = sa.artist_id "
+    // + "WHERE sa.song_id = ?";
+    // try (Connection conn = DatabaseConfig.getConnection();
+    // PreparedStatement ps = conn.prepareStatement(sql)) {
+    // ps.setLong(1, songId);
+    // try (ResultSet rs = ps.executeQuery()) {
+    // while (rs.next()) {
+    // artists.add(mapResultSetToArtist(rs));
+    // }
+    // }
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // return artists;
     // }
 }

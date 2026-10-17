@@ -19,28 +19,28 @@ public class Response {
 
     public static Response invalid(String message) {
         Response res = new Response();
-        res.status = Status.SUCCESS;
+        res.status = Status.INVALID_REQUEST;
         res.message = message;
         return res;
     }
 
-    // public static Response create(Request req, Status status, String message, Object data) {
-    //     Response res = new Response();
-    //     res.requestId = req.requestId;
-    //     res.action = req.action;
-    //     res.status = status;
-    //     res.message = message;
-    //     res.data = data;
-    //     return res;
-    // }
+    public static Response create(Request req, Status status, String message, Object data) {
+        Response res = new Response();
+        res.requestId = req.getRequestId();
+        res.action = req.getAction();
+        res.status = status;
+        res.message = message;
+        res.data = data;
+        return res;
+    }
 
-    // public static Response success(Request req, Object data) {
-    //     return create(req, Status.SUCCESS, "OK", data);
-    // }
+    public static Response success(Request req, Object data) {
+        return create(req, Status.SUCCESS, "OK", data);
+    }
 
-    // public static Response error(Request req, Status status, String message) {
-    //     return create(req, status, message, message);
-    // }
+    public static Response error(Request req, Status status, String message) {
+        return create(req, status, message, null);
+    }
 
     @JsonIgnore
     public boolean isSuccess() {
