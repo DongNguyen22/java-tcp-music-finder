@@ -30,79 +30,26 @@ public class TrendingController {
     private void initialize() {
 
         trendingMessageLabel.setText("");
-
-        Request request = Request.of(Action.GET_STATISTICS, null);
-
-        try {
-
-            ClientConnection
-                    .getInstance()
-                    .send(request);
-
-        } catch (IOException e) {
-
-            trendingMessageLabel.setText(
-                    "Cannot request statistics.");
-        }
     }
 
     @FXML
-    private void handleGoHome() throws IOException {
-        Navigator.goTo(Screen.HOME);
+    private void getTopArtists() throws IOException {
+        Request request = Request.of(Action.GET_TOP_ARTISTS, null);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
-    private void handleGoSearch() throws IOException {
-        Navigator.goTo(Screen.SEARCH);
-    }
-
-    @FXML
-    private void handleGoArtists() throws IOException {
-        Navigator.goTo(Screen.ARTISTS);
-    }
-
-    @FXML
-    private void handleGoPlaylists() throws IOException {
-        Navigator.goTo(Screen.PLAYLISTS);
-    }
-
-    @FXML
-    private void handleGoFavorites() throws IOException {
-        Navigator.goTo(Screen.FAVORITES);
-    }
-
-    @FXML
-    private void handleGoSearchHistory() throws IOException {
-        Navigator.goTo(Screen.SEARCH_HISTORY);
-    }
-
-    @FXML
-    private void handleGoProfile() throws IOException {
-        Navigator.goTo(Screen.PROFILE);
+    private void getTopSongs() throws IOException {
+        Request request = Request.of(Action.GET_TOP_SONGS, null);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
     private void handleNavPlaceholder() {
         trendingMessageLabel.setText("This screen will be connected when we build it in the next step.");
-    }
-
-    @FXML
-    private void handleExploreMusic() throws IOException {
-        handleGoSearch();
-    }
-
-    @FXML
-    private void handleLogout() {
-
-        Request request = Request.of(Action.LOGOUT, null);
-
-        try {
-
-            ClientConnection.getInstance().send(request);
-
-        } catch (IOException e) {
-
-            // show message tùy màn hình
-        }
     }
 }

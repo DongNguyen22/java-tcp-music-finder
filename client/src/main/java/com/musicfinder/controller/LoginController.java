@@ -1,10 +1,13 @@
 package com.musicfinder.controller;
 
+import com.musicfinder.navigation.Navigator;
+import com.musicfinder.navigation.Screen;
 import com.musicfinder.network.ClientConnection;
 import com.musicfinder.shared.enums.Action;
 import com.musicfinder.shared.request.Request;
 import com.musicfinder.shared.request.payload.LoginPayload;
 
+import javafx.application.Platform;
 import javafx.css.PseudoClass;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -83,19 +86,21 @@ public class LoginController {
     }
 
     @FXML
-    private void handleLogin() throws IOException {
+    private void handleLogin() {
 
         String username = usernameField.getText() == null
                 ? ""
                 : usernameField.getText().trim();
 
-        String password = passwordField.getText() == null ? ""
+        String password = passwordField.getText() == null
+                ? ""
                 : passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
             showMessage(
                     "Please enter your username/email and password.",
                     false);
+
             if (username.isEmpty()) {
                 usernameField.requestFocus();
             } else {
@@ -105,10 +110,37 @@ public class LoginController {
         }
 
         LoginPayload payload = new LoginPayload(username, password);
-
         Request request = Request.of(Action.LOGIN, payload);
 
-        ClientConnection.getInstance().send(request);
+        try {
+            ClientConnection.getInstance().send(request, response -> {
+                System.out.println(response.getMessage());
+
+                Platform.runLater(() -> {
+                    // if (response.isSuccess()) {
+                    // try {
+                    // Navigator.goTo(Screen.HOME);
+                    // } catch (IOException e) {
+                    // showMessage("Cannot open the home screen.", false);
+                    // e.printStackTrace();
+                    // }
+                    // } else {
+                    // showMessage(response.getMessage(), false);
+                    // passwordField.clear();
+                    // passwordField.requestFocus();
+                    // }
+                    try {
+                        Navigator.goTo(Screen.HOME);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                });
+            });
+        } catch (IOException e) {
+            showMessage("Cannot send login request to server.", false);
+            e.printStackTrace();
+        }
     }
 
     @FXML

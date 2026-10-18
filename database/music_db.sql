@@ -75,8 +75,8 @@ CREATE TABLE IF NOT EXISTS SONG_ARTISTS (
     song_id   BIGINT NOT NULL,
     artist_id BIGINT NOT NULL,
     PRIMARY KEY (song_id, artist_id),
-    CONSTRAINT fk_song_artists_song   FOREIGN KEY (song_id)   REFERENCES SONGS(song_id),
-    CONSTRAINT fk_song_artists_artist FOREIGN KEY (artist_id) REFERENCES ARTISTS(artist_id)
+    CONSTRAINT fk_song_artists_song   FOREIGN KEY (song_id)   REFERENCES SONGS(song_id) ON DELETE CASCADE,
+    CONSTRAINT fk_song_artists_artist FOREIGN KEY (artist_id) REFERENCES ARTISTS(artist_id) ON DELETE CASCADE
 );
 
 -- =============================================================================
@@ -89,9 +89,10 @@ CREATE TABLE IF NOT EXISTS PLAYLISTS (
     user_id     BIGINT,
     name        VARCHAR(100) NOT NULL,
     description VARCHAR(255),
+    type VARCHAR(20) NOT NULL DEFAULT 'NORMAL' CHECK (type IN ('NORMAL', 'FAVORITES')),
     created_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_playlists_user FOREIGN KEY (user_id) REFERENCES USERS(user_id)
+    CONSTRAINT fk_playlists_user FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
 );
 
 -- =============================================================================
@@ -105,8 +106,8 @@ CREATE TABLE IF NOT EXISTS PLAYLIST_SONGS (
     position    INTEGER   CHECK (position >= 0),
     added_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (playlist_id, song_id),
-    CONSTRAINT fk_playlist_songs_playlist FOREIGN KEY (playlist_id) REFERENCES PLAYLISTS(playlist_id),
-    CONSTRAINT fk_playlist_songs_song     FOREIGN KEY (song_id)     REFERENCES SONGS(song_id)
+    CONSTRAINT fk_playlist_songs_playlist FOREIGN KEY (playlist_id) REFERENCES PLAYLISTS(playlist_id) ON DELETE CASCADE,
+    CONSTRAINT fk_playlist_songs_song     FOREIGN KEY (song_id)     REFERENCES SONGS(song_id) ON DELETE CASCADE
 );
 
 -- =============================================================================
@@ -122,7 +123,7 @@ CREATE TABLE IF NOT EXISTS SEARCH_HISTORY (
     search_type        VARCHAR(20),
     result_count       INTEGER      CHECK (result_count >= 0),
     searched_at        TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_search_history_user FOREIGN KEY (user_id) REFERENCES USERS(user_id)
+    CONSTRAINT fk_search_history_user FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
 );
 
 -- =============================================================================
@@ -139,8 +140,7 @@ CREATE TABLE IF NOT EXISTS SEARCH_CACHE (
     search_type        VARCHAR(20)  NOT NULL,
     response_json      JSONB        NOT NULL,
     created_at         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    expires_at         TIMESTAMP    NOT NULL,
-    last_accessed_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    expires_at         TIMESTAMP    NOT NULL
 );
 
 -- =============================================================================
@@ -163,6 +163,11 @@ CREATE INDEX IF NOT EXISTS idx_song_artists_artist_id ON SONG_ARTISTS(artist_id)
 
 -- PLAYLISTS
 CREATE INDEX IF NOT EXISTS idx_playlists_user_id ON PLAYLISTS(user_id);
+
+-- Mỗi user chỉ có tối đa một playlist FAVORITES
+CREATE UNIQUE INDEX IF NOT EXISTS ux_playlists_user_favorites
+ON PLAYLISTS(user_id)
+WHERE type = 'FAVORITES';
 
 -- PLAYLIST_SONGS (PK đã cover playlist_id; thêm index riêng cho song_id phục vụ lookup ngược)
 CREATE INDEX IF NOT EXISTS idx_playlist_songs_song_id ON PLAYLIST_SONGS(song_id);
