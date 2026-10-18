@@ -3,5 +3,5 @@ package com.musicfinder.shared.response.payload;
 import com.musicfinder.shared.dto.HistoryDTO;
 import java.util.List;
 
-public record HistoryListData(int total, List<HistoryDTO> items) {
+public record GetHistoryData(int total, List<HistoryDTO> items) {
 }
