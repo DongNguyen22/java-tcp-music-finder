@@ -1,7 +1,9 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.Songs;
+import lombok.extern.slf4j.Slf4j;
 import com.musicfinder.server.util.TextNormalizer;
 
 import java.sql.*;
@@ -9,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 public class SongRepository {
     // Hàm chuyển đổi resultSet sang đối tượng Song
     private Songs mapResultSetToSong(ResultSet rs) throws SQLException {
@@ -44,10 +47,11 @@ public class SongRepository {
                     songs.add(mapResultSetToSong(rs));
                 }
             }
+            return songs;
         } catch (SQLException e) {
-            System.out.println("Loi ket noi" + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo tên [{}]: {}", title, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo tên " + title, e);
         }
-        return songs;
     }
 
     // Tim theo id song
@@ -60,11 +64,11 @@ public class SongRepository {
                 if (rs.next())
                     return Optional.of(mapResultSetToSong(rs));
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            System.out.println("Lỗi kết nối");
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo ID [{}]: {}", songId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát ID " + songId, e);
         }
-        return Optional.empty();
     }
 
     // Tìm theo external_id (kiểm tra trước khi sync từ API ngoài)
@@ -78,10 +82,11 @@ public class SongRepository {
                     return Optional.of(mapResultSetToSong(rs));
                 }
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            System.out.println("loi ket noi" + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo external_id [{}]: {}", externalId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo external_id " + externalId, e);
         }
-        return Optional.empty();
     }
 
     // Tăng lượt tìm kiếm(search_count)
@@ -92,7 +97,8 @@ public class SongRepository {
             ps.setLong(1, songId);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.out.println("loi ket noi" + e.getMessage());
+            log.error("Lỗi cập nhật lượt tìm kiếm bài hát [{}]: {}", songId, e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật lượt tìm kiếm bài hát ID " + songId, e);
         }
     }
 
@@ -122,7 +128,8 @@ public class SongRepository {
             }
             return song;
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi lưu bài hát: " + e.getMessage(), e);
+            log.error("Lỗi lưu bài hát [{}]: {}", song.getTitle(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu bài hát " + song.getTitle(), e);
         }
     }
 
@@ -145,9 +152,9 @@ public class SongRepository {
             ps.setLong(9, song.getSongId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi cập nhật bài hát [{}]: {}", song.getSongId(), e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật bài hát ID " + song.getSongId(), e);
         }
-        return false;
     }
 
     // Lay danh sach bai hat theo id artist
@@ -164,10 +171,11 @@ public class SongRepository {
                     songs.add(mapResultSetToSong(rs));
                 }
             }
+            return songs;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo artist_id [{}]: {}", artistId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo artist_id " + artistId, e);
         }
-        return songs;
     }
 
     public List<Songs> findByPlaylistId(Long playlistId) {
@@ -183,9 +191,10 @@ public class SongRepository {
                     songs.add(mapResultSetToSong(rs));
                 }
             }
+            return songs;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo playlist_id [{}]: {}", playlistId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo playlist_id " + playlistId, e);
         }
-        return songs;
     }
 }

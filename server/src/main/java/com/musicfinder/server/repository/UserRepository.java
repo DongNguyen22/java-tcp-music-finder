@@ -3,11 +3,15 @@ package com.musicfinder.server.repository;
 import com.musicfinder.server.config.DatabaseConfig;
 import com.musicfinder.server.model.Users;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.musicfinder.server.exception.DataException;
 
+@Slf4j
 public class UserRepository {
     // hàm ánh xạ resultSet sang đối tượng users
     private Users mapResultSetToUser(ResultSet rs) throws SQLException {
@@ -26,21 +30,24 @@ public class UserRepository {
                 .build();
     }
 
-    // tim theo ten nguoi dung
+    // =============================AUTH===================================
+    // tim theo ten user
     public Optional<Users> findByUsername(String username) {
         String sql = "SELECT * FROM USERS WHERE username = ?";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
+            ps.setString(1, username);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+                if (rs.next())
                     return Optional.of(mapResultSetToUser(rs));
-                }
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            System.out.println("Lỗi kết nối: " + e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi tìm user [{}]: {}", username, e.getMessage(), e);
+            // Ném lỗi ra service
+            throw new DataException("Lỗi truy vấn CSDL khi tìm user " + username, e);
         }
-        return Optional.empty();
     }
 
     // tim theo id user_id
@@ -54,11 +61,12 @@ public class UserRepository {
                     return Optional.of(mapResultSetToUser(rs));
                 }
             }
+            return Optional.empty(); 
         } catch (SQLException e) {
-            System.out.println("Lỗi kết nối");
-            e.printStackTrace();
+            log.error("Lỗi truy vấn CSDL khi tìm user [{}]: {}", userId, e.getMessage(), e);
+            // Ném lỗi hạ tầng ra ngoài cho Service biết!
+            throw new DataException("Lỗi truy vấn CSDL khi tìm user " + userId, e);
         }
-        return Optional.empty();
     }
 
     // Kiem tra user co ton tai chua
@@ -71,9 +79,9 @@ public class UserRepository {
                 return rs.next(); // true nếu có, false nếu kh có
             }
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi kiểm tra tồn tại username [{}]: {}", username, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi kiểm tra tồn tại username " + username, e);
         }
-        return false;
     }
 
     // Kiem tra email da ton tai chua
@@ -86,9 +94,9 @@ public class UserRepository {
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.err.println(e.getMessage());
+            log.error("Lỗi truy vấn CSDL khi kiểm tra tồn tại email [{}]: {}", email, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi kiểm tra tồn tại email " + email, e);
         }
-        return false;
     }
 
     // them tai khoan moi
@@ -111,9 +119,9 @@ public class UserRepository {
                 }
             }
             return user;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Lỗi lưu người dùng: " + e.getMessage(), e);
+        } catch (SQLException e) {
+            log.error("Lỗi lưu người dùng [{}]: {}", user.getUsername(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu người dùng " + user.getUsername(), e);
         }
     }
 
@@ -129,8 +137,42 @@ public class UserRepository {
             ps.setLong(4, user.getUserId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi cập nhật người dùng [{}]: {}", user.getUserId(), e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật người dùng " + user.getUserId(), e);
         }
-        return false;
+    }
+
+    // Update mat khau
+    public boolean updatePassword(Long userId, String newPasswordHash) {
+        String sql = "UPDATE USERS SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, newPasswordHash);
+            ps.setLong(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            log.error("Lỗi cập nhật mật khẩu cho user ID [{}]: {}", userId, e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật mật khẩu cho user ID " + userId, e);
+        }
+    }
+
+    // ===========================SEARCH=================================
+    public List<Users> searchByUserName(String username, int limit) {
+        List<Users> users = new ArrayList<>();
+        String sql = "SELECT * FROM USERS WHERE username ILIKE ? LIMIT ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + username + "%");
+            ps.setInt(2, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+            return users;
+        } catch (SQLException e) {
+            log.error("Lỗi tìm kiếm user theo username [{}]: {}", username, e.getMessage(), e);
+            throw new DataException("Lỗi tìm kiếm user theo username " + username, e);
+        }
     }
 }

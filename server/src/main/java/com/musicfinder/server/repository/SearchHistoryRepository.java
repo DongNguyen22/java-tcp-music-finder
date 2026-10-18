@@ -1,12 +1,15 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.SearchHistory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class SearchHistoryRepository {
 
     private SearchHistory mapResultSetToSearchHistory(ResultSet rs) throws SQLException {
@@ -34,10 +37,11 @@ public class SearchHistoryRepository {
                     list.add(mapResultSetToSearchHistory(rs));
                 }
             }
+            return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn lịch sử tìm kiếm theo user_id [{}]: {}", userId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn lịch sử tìm kiếm theo user_id " + userId, e);
         }
-        return list;
     }
 
     public SearchHistory save(SearchHistory history) {
@@ -63,7 +67,8 @@ public class SearchHistoryRepository {
             }
             return history;
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi lưu lịch sử tìm kiếm: " + e.getMessage(), e);
+            log.error("Lỗi lưu lịch sử tìm kiếm user [{}], keyword [{}]: {}", history.getUserId(), history.getKeyword(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu lịch sử tìm kiếm", e);
         }
     }
 
@@ -74,9 +79,9 @@ public class SearchHistoryRepository {
             ps.setLong(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi xóa lịch sử tìm kiếm theo user_id [{}]: {}", userId, e.getMessage(), e);
+            throw new DataException("Lỗi xóa lịch sử tìm kiếm theo user_id " + userId, e);
         }
-        return false;
     }
 
     public List<SearchHistory> findTopKeywords(String searchType, int limit) {
@@ -99,9 +104,10 @@ public class SearchHistoryRepository {
                             .build());
                 }
             }
+            return list;
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi lấy top keywords loại [{}]: {}", searchType, e.getMessage(), e);
+            throw new DataException("Lỗi lấy top keywords loại " + searchType, e);
         }
-        return list;
     }
 }

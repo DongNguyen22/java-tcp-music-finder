@@ -1,11 +1,14 @@
 package com.musicfinder.server.repository;
 
 import com.musicfinder.server.config.DatabaseConfig;
+import com.musicfinder.server.exception.DataException;
 import com.musicfinder.server.model.SearchCache;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
 import java.util.Optional;
 
+@Slf4j
 public class SearchCacheRepository {
 
     private SearchCache mapResultSetToSearchCache(ResultSet rs) throws SQLException {
@@ -37,10 +40,11 @@ public class SearchCacheRepository {
                     return Optional.of(mapResultSetToSearchCache(rs));
                 }
             }
+            return Optional.empty();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn search cache theo key [{}]: {}", cacheKey, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn search cache theo key " + cacheKey, e);
         }
-        return Optional.empty();
     }
 
     private void updateLastAccessed(String cacheKey, Connection conn) {
@@ -49,7 +53,8 @@ public class SearchCacheRepository {
             ps.setString(1, cacheKey);
             ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi cập nhật last_accessed_at cho cacheKey [{}]: {}", cacheKey, e.getMessage(), e);
+            throw new DataException("Lỗi cập nhật last_accessed_at cho cacheKey " + cacheKey, e);
         }
     }
 
@@ -73,7 +78,8 @@ public class SearchCacheRepository {
             }
             return cache;
         } catch (SQLException e) {
-            throw new RuntimeException("Lỗi lưu cache: " + e.getMessage(), e);
+            log.error("Lỗi lưu search cache [{}]: {}", cache.getCacheKey(), e.getMessage(), e);
+            throw new DataException("Lỗi lưu search cache key " + cache.getCacheKey(), e);
         }
     }
 
@@ -83,8 +89,8 @@ public class SearchCacheRepository {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             return ps.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi xóa search cache hết hạn: {}", e.getMessage(), e);
+            throw new DataException("Lỗi xóa search cache hết hạn", e);
         }
-        return 0;
     }
 }
