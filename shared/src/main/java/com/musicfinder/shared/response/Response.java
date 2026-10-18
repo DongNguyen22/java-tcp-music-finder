@@ -6,16 +6,19 @@ import com.musicfinder.shared.enums.Status;
 import com.musicfinder.shared.request.Request;
 import com.musicfinder.shared.util.Json;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data 
+@NoArgsConstructor 
+@AllArgsConstructor 
 public class Response {
     public String requestId;
     public Action action;
     public Status status;
     public String message;
     public Object data;
-
-    public Response() {
-
-    }
 
     public static Response invalid(String message) {
         Response res = new Response();

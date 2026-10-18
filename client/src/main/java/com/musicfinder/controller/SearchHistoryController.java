@@ -6,6 +6,7 @@ import com.musicfinder.navigation.Screen;
 import com.musicfinder.network.ClientConnection;
 import com.musicfinder.shared.enums.Action;
 import com.musicfinder.shared.request.Request;
+import com.musicfinder.shared.request.payload.RemoveRowSearchHistory;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -42,133 +43,60 @@ public class SearchHistoryController {
     private void initialize() throws IOException {
 
         historyMessageLabel.setText("");
+    }
 
+    @FXML
+    private void getAll() throws IOException {
         Request request = Request.of(Action.GET_HISTORY, null);
-
-        ClientConnection.getInstance().send(request);
-    }
-
-    @FXML
-    private void handleShowAll() {
-        showAll();
-        setActiveTab(allTabButton);
-    }
-
-    @FXML
-    private void handleShowSongs() {
-        setManagedVisible(songRowOne, true);
-        setManagedVisible(songRowTwo, true);
-        setManagedVisible(artistRowOne, false);
-        setManagedVisible(artistRowTwo, false);
-        historyTable.setVisible(true);
-        historyTable.setManaged(true);
-        historyMessageLabel.setText("Showing song searches only.");
-        setActiveTab(songsTabButton);
-    }
-
-    @FXML
-    private void handleShowArtists() {
-        setManagedVisible(songRowOne, false);
-        setManagedVisible(songRowTwo, false);
-        setManagedVisible(artistRowOne, true);
-        setManagedVisible(artistRowTwo, true);
-        historyTable.setVisible(true);
-        historyTable.setManaged(true);
-        historyMessageLabel.setText("Showing artist searches only.");
-        setActiveTab(artistsTabButton);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
     private void handleClearHistory() throws IOException {
-
         Request request = Request.of(Action.CLEAR_HISTORY, null);
-
-        ClientConnection.getInstance().send(request);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
-    private void handleSearchAgain() throws IOException {
-        Navigator.goTo(Screen.SEARCH);
+    private void handleRemoveRow() throws IOException {
+        // RemoveRowSearchHistory payload = new RemoveRowSearchHistory();
+        Request request = Request.of(Action.REMOVE_ROW_HISTORY, null);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
-    private void handleGoHome() throws IOException {
-        Navigator.goTo(Screen.HOME);
+    private void handleShowAll() {
+        setActiveFilter(allTabButton);
     }
 
     @FXML
-    private void handleGoSearch() throws IOException {
-        Navigator.goTo(Screen.SEARCH);
+    private void handleShowSongs() {
+        setActiveFilter(songsTabButton);
     }
 
     @FXML
-    private void handleGoArtists() throws IOException {
-        Navigator.goTo(Screen.ARTISTS);
+    private void handleShowArtists() {
+        setActiveFilter(artistsTabButton);
     }
 
-    @FXML
-    private void handleGoPlaylists() throws IOException {
-        Navigator.goTo(Screen.PLAYLISTS);
-    }
+    private void setActiveFilter(Button activeButton) {
+        allTabButton.getStyleClass().remove("filter-tab-active");
+        songsTabButton.getStyleClass().remove("filter-tab-active");
+        artistsTabButton.getStyleClass().remove("filter-tab-active");
 
-    @FXML
-    private void handleGoFavorites() throws IOException {
-        Navigator.goTo(Screen.FAVORITES);
-    }
-
-    @FXML
-    private void handleGoTrending() throws IOException {
-        Navigator.goTo(Screen.TRENDING);
-    }
-
-    @FXML
-    private void handleGoProfile() throws IOException {
-        Navigator.goTo(Screen.PROFILE);
+        if (!activeButton.getStyleClass().contains("filter-tab-active")) {
+            activeButton.getStyleClass().add("filter-tab-active");
+        }
     }
 
     @FXML
     private void handleNavPlaceholder() {
         historyMessageLabel.setText("This screen will be connected when we build it in the next steps.");
-    }
-
-    @FXML
-    private void handleLogout() {
-
-        Request request = Request.of(Action.LOGOUT, null);
-
-        try {
-
-            ClientConnection.getInstance().send(request);
-
-        } catch (IOException e) {
-
-            // show message tùy màn hình
-        }
-    }
-
-    private void showAll() {
-        setManagedVisible(songRowOne, true);
-        setManagedVisible(songRowTwo, true);
-        setManagedVisible(artistRowOne, true);
-        setManagedVisible(artistRowTwo, true);
-        historyTable.setVisible(true);
-        historyTable.setManaged(true);
-        historyMessageLabel.setText("");
-        setActiveTab(allTabButton);
-    }
-
-    private void setManagedVisible(HBox row, boolean visible) {
-        row.setVisible(visible);
-        row.setManaged(visible);
-    }
-
-    private void setActiveTab(Button activeButton) {
-        Button[] tabs = { allTabButton, songsTabButton, artistsTabButton };
-        for (Button tab : tabs) {
-            tab.getStyleClass().remove("filter-tab-active");
-        }
-        if (!activeButton.getStyleClass().contains("filter-tab-active")) {
-            activeButton.getStyleClass().add("filter-tab-active");
-        }
     }
 }

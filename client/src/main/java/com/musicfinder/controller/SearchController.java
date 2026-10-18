@@ -35,6 +35,7 @@ public class SearchController {
                 : searchField.getText().trim();
 
         if (keyword.isEmpty()) {
+            searchField.requestFocus();
             showMessage("Enter a song title to search.");
             return;
         }
@@ -45,62 +46,14 @@ public class SearchController {
                 Action.SEARCH_SONG,
                 payload);
 
-        ClientConnection.getInstance().send(request);
-    }
-
-    @FXML
-    private void handleGoHome() throws IOException {
-        Navigator.goTo(Screen.HOME);
-    }
-
-    @FXML
-    private void handleGoToArtists() throws IOException {
-        Navigator.goTo(Screen.ARTISTS);
-    }
-
-    @FXML
-    private void handleGoToPlaylists() throws IOException {
-        Navigator.goTo(Screen.PLAYLISTS);
-    }
-
-    @FXML
-    private void handleGoFavorites() throws IOException {
-        Navigator.goTo(Screen.FAVORITES);
-    }
-
-    @FXML
-    private void handleGoSearchHistory() throws IOException {
-        Navigator.goTo(Screen.SEARCH_HISTORY);
-    }
-
-    @FXML
-    private void handleGoTrending() throws IOException {
-        Navigator.goTo(Screen.TRENDING);
-    }
-
-    @FXML
-    private void handleGoProfile() throws IOException {
-        Navigator.goTo(Screen.PROFILE);
+        ClientConnection.getInstance().send(request, response -> {
+            // UI UPDATE LATER
+        });
     }
 
     @FXML
     private void handleNavPlaceholder() {
         showMessage("This screen will be connected when we build it in the next steps.");
-    }
-
-    @FXML
-    private void handleLogout() {
-
-        Request request = Request.of(Action.LOGOUT, null);
-
-        try {
-
-            ClientConnection.getInstance().send(request);
-
-        } catch (IOException e) {
-
-            // show message tùy màn hình
-        }
     }
 
     private void showMessage(String message) {
