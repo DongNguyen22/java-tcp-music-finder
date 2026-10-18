@@ -1,6 +1,5 @@
 package com.musicfinder.shared.response.payload;
 
-import com.musicfinder.shared.dto.ArtistDTO;
+public record ViewArtistDetailData(ArtistData artist) {
 
-public record ViewArtistDetailData(ArtistDTO artist) {
 }
