@@ -28,7 +28,7 @@ public class SongRepository {
                 .audioUrl(rs.getString("audio_url"))
                 .videoUrl(rs.getString("video_url"))
                 .thumbnailUrl(rs.getString("thumbnail_url"))
-                .searchCount(rs.getInt("search_count"))
+                .searchCount(rs.getLong("search_count"))
                 .createdAt(createdAtTs != null ? createdAtTs.toLocalDateTime() : null)
                 .updatedAt(updatedAtTs != null ? updatedAtTs.toLocalDateTime() : null)
                 .build();
@@ -117,7 +117,7 @@ public class SongRepository {
             ps.setString(6, song.getAudioUrl());
             ps.setString(7, song.getVideoUrl());
             ps.setString(8, song.getThumbnailUrl());
-            ps.setInt(9, song.getSearchCount());
+            ps.setLong(9, song.getSearchCount());
             int affected = ps.executeUpdate();
             if (affected > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -195,6 +195,25 @@ public class SongRepository {
         } catch (SQLException e) {
             log.error("Lỗi truy vấn CSDL khi tìm bài hát theo playlist_id [{}]: {}", playlistId, e.getMessage(), e);
             throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo playlist_id " + playlistId, e);
+        }
+    }
+
+    // Thống kê: Lấy top bài hát được tìm kiếm nhiều nhất
+    public List<Songs> findTopSongs(int limit) {
+        List<Songs> songs = new ArrayList<>();
+        String sql = "SELECT * FROM SONGS ORDER BY search_count DESC, created_at DESC LIMIT ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    songs.add(mapResultSetToSong(rs));
+                }
+            }
+            return songs;
+        } catch (SQLException e) {
+            log.error("Lỗi truy vấn top bài hát thịnh hành: {}", e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn top bài hát thịnh hành", e);
         }
     }
 }

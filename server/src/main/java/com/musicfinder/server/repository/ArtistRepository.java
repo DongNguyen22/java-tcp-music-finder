@@ -29,7 +29,7 @@ public class ArtistRepository {
                 .homeTown(rs.getString("hometown"))
                 .bio(rs.getString("biography"))
                 .imageUrl(rs.getString("image_url"))
-                .searchCount(rs.getInt("search_count"))
+                .searchCount(rs.getLong("search_count"))
                 .createdAt(createdAtTs != null ? createdAtTs.toLocalDateTime() : null)
                 .updateAt(updatedAtTs != null ? updatedAtTs.toLocalDateTime() : null)
                 .build();
@@ -74,7 +74,7 @@ public class ArtistRepository {
     // Tìm kiếm nghệ sĩ theo tên (tìm gần đúng bằng ILIKE)
     public List<Artists> searchByName(String name) {
         List<Artists> list = new ArrayList<>();
-        String sql = "SELECT * FROM SONGS WHERE title ILIKE ? OR normalized_title ILIKE ? LIMIT 20";
+        String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 20";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + name + "%"); // tên gốc
@@ -105,7 +105,7 @@ public class ArtistRepository {
             ps.setString(5, artist.getHomeTown());
             ps.setString(6, artist.getBio());
             ps.setString(7, artist.getImageUrl());
-            ps.setInt(8, artist.getSearchCount());
+            ps.setLong(8, artist.getSearchCount());
 
             int affected = ps.executeUpdate();
             if (affected > 0) {
@@ -158,6 +158,25 @@ public class ArtistRepository {
         }
     }
 
+    // Thống kê: Lấy top nghệ sĩ được tìm kiếm nhiều nhất
+    public List<Artists> findTopArtists(int limit) {
+        List<Artists> list = new ArrayList<>();
+        String sql = "SELECT * FROM ARTISTS ORDER BY search_count DESC, created_at DESC LIMIT ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, Math.max(1, limit));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToArtist(rs));
+                }
+            }
+            return list;
+        } catch (SQLException e) {
+            log.error("Lỗi truy vấn top nghệ sĩ thịnh hành: {}", e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn top nghệ sĩ thịnh hành", e);
+        }
+    }
+
     // // Lấy danh sách nghệ sĩ của một bài hát (JOIN SONG_ARTISTS)
     // public List<Artists> findBySongId(Long songId) {
     // List<Artists> artists = new ArrayList<>();
@@ -178,3 +197,4 @@ public class ArtistRepository {
     // return artists;
     // }
 }
+

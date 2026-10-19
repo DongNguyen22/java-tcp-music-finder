@@ -21,7 +21,7 @@ public class Artists {
     private String homeTown;
     private String bio;
     private String imageUrl;
-    private int searchCount;
+    private Long searchCount;
     private LocalDateTime createdAt;
     private LocalDateTime updateAt;
     
