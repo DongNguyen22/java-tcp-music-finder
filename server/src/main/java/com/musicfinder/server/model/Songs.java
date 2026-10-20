@@ -22,7 +22,7 @@ public class Songs {
     private String audioUrl;
     private String videoUrl;
     private String thumbnailUrl;
-    private int searchCount;
+    private Long searchCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
