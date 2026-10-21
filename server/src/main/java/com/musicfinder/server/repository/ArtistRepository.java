@@ -71,20 +71,21 @@ public class ArtistRepository {
         }
     }
 
-    // Tìm kiếm nghệ sĩ theo tên (tìm gần đúng bằng ILIKE)
-    public List<Artists> searchByName(String name) {
-        List<Artists> list = new ArrayList<>();
-        String sql = "SELECT * FROM ARTISTS WHERE name ILIKE ? OR normalized_name ILIKE ? LIMIT 20";
+    // Tìm kiếm nghệ sĩ theo tên
+    public List<Artists> searchByName(String name, int limit) {
+        List<Artists> artists = new ArrayList<>();
+        String sql = "SELECT * FROM ARTISTS WHERE name LIKE ? LIMIT ?";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + name + "%"); // tên gốc
-            ps.setString(2, "%" + TextNormalizer.normalize(name) + "%"); // tên đã chuẩn hoá
+            String normalizedName = TextNormalizer.normalize(name);
+            ps.setString(1, "%" + normalizedName + "%"); // tên gốc
+            ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(mapResultSetToArtist(rs));
+                    artists.add(mapResultSetToArtist(rs));
                 }
             }
-            return list;
+            return artists;
         } catch (SQLException e) {
             log.error("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo tên [{}]: {}", name, e.getMessage(), e);
             throw new DataException("Lỗi truy vấn CSDL khi tìm nghệ sĩ theo tên " + name, e);
@@ -105,8 +106,7 @@ public class ArtistRepository {
             ps.setString(5, artist.getHomeTown());
             ps.setString(6, artist.getBio());
             ps.setString(7, artist.getImageUrl());
-            ps.setLong(8, artist.getSearchCount());
-
+            ps.setLong(8, artist.getSearchCount() != null ? artist.getSearchCount() : 0L);
             int affected = ps.executeUpdate();
             if (affected > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -178,23 +178,22 @@ public class ArtistRepository {
     }
 
     // // Lấy danh sách nghệ sĩ của một bài hát (JOIN SONG_ARTISTS)
-    // public List<Artists> findBySongId(Long songId) {
-    // List<Artists> artists = new ArrayList<>();
-    // String sql = "SELECT a.* FROM ARTISTS a "
-    // + "JOIN SONG_ARTISTS sa ON a.artist_id = sa.artist_id "
-    // + "WHERE sa.song_id = ?";
-    // try (Connection conn = DatabaseConfig.getConnection();
-    // PreparedStatement ps = conn.prepareStatement(sql)) {
-    // ps.setLong(1, songId);
-    // try (ResultSet rs = ps.executeQuery()) {
-    // while (rs.next()) {
-    // artists.add(mapResultSetToArtist(rs));
-    // }
-    // }
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-    // return artists;
-    // }
+    public List<Artists> findAllArtistByASongId(Long songId) {
+        List<Artists> artists = new ArrayList<>();
+        String sql = "SELECT a.* FROM ARTISTS a "
+                + "JOIN SONG_ARTISTS sa ON a.artist_id = sa.artist_id "
+                + "WHERE sa.song_id = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, songId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    artists.add(mapResultSetToArtist(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return artists;
+    }
 }
-
