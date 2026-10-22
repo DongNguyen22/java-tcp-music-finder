@@ -192,7 +192,8 @@ public class ArtistRepository {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            log.error("Lỗi truy vấn nghệ sĩ theo song_id [{}]: {}", songId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn nghệ sĩ theo song_id " + songId, e);
         }
         return artists;
     }
