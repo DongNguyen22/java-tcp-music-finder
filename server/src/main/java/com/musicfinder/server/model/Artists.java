@@ -24,7 +24,4 @@ public class Artists {
     private Long searchCount;
     private LocalDateTime createdAt;
     private LocalDateTime updateAt;
-    
-
-
 }

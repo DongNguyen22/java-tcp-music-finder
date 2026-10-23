@@ -30,7 +30,7 @@ public class SearchHistoryRepository {
         List<SearchHistory> list = new ArrayList<>();
         String sql = "SELECT * FROM SEARCH_HISTORY WHERE user_id = ? ORDER BY searched_at DESC";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -46,9 +46,9 @@ public class SearchHistoryRepository {
 
     public SearchHistory save(SearchHistory history) {
         String sql = "INSERT INTO SEARCH_HISTORY (user_id, keyword, normalized_keyword, search_type, result_count) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, history.getUserId());
             ps.setString(2, history.getKeyword());
             ps.setString(3, history.getNormalizedKeyword());
@@ -67,7 +67,8 @@ public class SearchHistoryRepository {
             }
             return history;
         } catch (SQLException e) {
-            log.error("Lỗi lưu lịch sử tìm kiếm user [{}], keyword [{}]: {}", history.getUserId(), history.getKeyword(), e.getMessage(), e);
+            log.error("Lỗi lưu lịch sử tìm kiếm user [{}], keyword [{}]: {}", history.getUserId(), history.getKeyword(),
+                    e.getMessage(), e);
             throw new DataException("Lỗi lưu lịch sử tìm kiếm", e);
         }
     }
@@ -75,7 +76,7 @@ public class SearchHistoryRepository {
     public boolean deleteByUserId(Long userId) {
         String sql = "DELETE FROM SEARCH_HISTORY WHERE user_id = ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, userId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -87,11 +88,11 @@ public class SearchHistoryRepository {
     public List<SearchHistory> findTopKeywords(String searchType, int limit) {
         List<SearchHistory> list = new ArrayList<>();
         String sql = "SELECT keyword, normalized_keyword, search_type, COUNT(*) AS search_count "
-                   + "FROM SEARCH_HISTORY WHERE search_type = ? "
-                   + "GROUP BY keyword, normalized_keyword, search_type "
-                   + "ORDER BY search_count DESC LIMIT ?";
+                + "FROM SEARCH_HISTORY WHERE search_type = ? "
+                + "GROUP BY keyword, normalized_keyword, search_type "
+                + "ORDER BY search_count DESC LIMIT ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, searchType);
             ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
@@ -108,6 +109,38 @@ public class SearchHistoryRepository {
         } catch (SQLException e) {
             log.error("Lỗi lấy top keywords loại [{}]: {}", searchType, e.getMessage(), e);
             throw new DataException("Lỗi lấy top keywords loại " + searchType, e);
+        }
+    }
+
+    public boolean deleteById(Long historyId, Long userId) {
+        String sql = "DELETE FROM SEARCH_HISTORY WHERE history_id = ? AND user_id = ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, historyId);
+            ps.setLong(2, userId);
+            return ps.executeUpdate() > 0; // false = không có dòng đó hoặc không thuộc user này
+        } catch (SQLException e) {
+            log.error("Lỗi xóa lịch sử [{}] của user [{}]: {}", historyId, userId, e.getMessage(), e);
+            throw new DataException("Lỗi xóa lịch sử ID " + historyId, e);
+        }
+    }
+
+    public List<SearchHistory> findByUserId(Long userId, int limit) {
+        List<SearchHistory> list = new ArrayList<>();
+        String sql = "SELECT * FROM SEARCH_HISTORY WHERE user_id = ? ORDER BY searched_at DESC LIMIT ?";
+        try (Connection conn = DatabaseConfig.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setInt(2, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(mapResultSetToSearchHistory(rs));
+                }
+            }
+            return list;
+        } catch (SQLException e) {
+            log.error("Lỗi truy vấn lịch sử tìm kiếm theo user_id [{}]: {}", userId, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn lịch sử tìm kiếm theo user_id " + userId, e);
         }
     }
 }

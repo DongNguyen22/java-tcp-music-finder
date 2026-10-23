@@ -19,5 +19,4 @@ public class SearchCache {
     private String responseJson;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
-    private LocalDateTime lastAccessedAt;
 }

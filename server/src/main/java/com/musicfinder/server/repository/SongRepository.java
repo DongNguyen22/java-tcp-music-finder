@@ -34,14 +34,15 @@ public class SongRepository {
                 .build();
     }
 
-    // Tim theo ten title song
-    public List<Songs> findByTitle(String title) {
+    // Tim kiem nhac
+    public List<Songs> searchSongs(String nameSong, int limit) {
         List<Songs> songs = new ArrayList<>();
-        String sql = "SELECT * FROM SONGS WHERE title ILIKE ? OR normalized_title ILIKE ? LIMIT 20";
+        String sql = "SELECT * FROM SONGS WHERE normalized_title LIKE ? LIMIT ?";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, "%" + title + "%"); // tên gốc
-            ps.setString(2, "%" + TextNormalizer.normalize(title) + "%"); // tên đã chuẩn hoá
+            String normalizedName = TextNormalizer.normalize(nameSong);
+            ps.setString(1, "%" + normalizedName + "%");
+            ps.setInt(2, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     songs.add(mapResultSetToSong(rs));
@@ -49,8 +50,8 @@ public class SongRepository {
             }
             return songs;
         } catch (SQLException e) {
-            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo tên [{}]: {}", title, e.getMessage(), e);
-            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo tên " + title, e);
+            log.error("Lỗi truy vấn CSDL khi tìm bài hát theo tên [{}]: {}", nameSong, e.getMessage(), e);
+            throw new DataException("Lỗi truy vấn CSDL khi tìm bài hát theo tên " + nameSong, e);
         }
     }
 
@@ -117,7 +118,7 @@ public class SongRepository {
             ps.setString(6, song.getAudioUrl());
             ps.setString(7, song.getVideoUrl());
             ps.setString(8, song.getThumbnailUrl());
-            ps.setLong(9, song.getSearchCount());
+            ps.setLong(9, song.getSearchCount() != null ? song.getSearchCount() : 0L);
             int affected = ps.executeUpdate();
             if (affected > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -181,10 +182,10 @@ public class SongRepository {
     public List<Songs> findByPlaylistId(Long playlistId) {
         List<Songs> songs = new ArrayList<>();
         String sql = "SELECT s.* FROM SONGS s "
-                   + "JOIN PLAYLIST_SONGS ps ON s.song_id = ps.song_id "
-                   + "WHERE ps.playlist_id = ? ORDER BY ps.position ASC";
+                + "JOIN PLAYLIST_SONGS ps ON s.song_id = ps.song_id "
+                + "WHERE ps.playlist_id = ? ORDER BY ps.position ASC";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, playlistId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -203,7 +204,7 @@ public class SongRepository {
         List<Songs> songs = new ArrayList<>();
         String sql = "SELECT * FROM SONGS ORDER BY search_count DESC, created_at DESC LIMIT ?";
         try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Math.max(1, limit));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
