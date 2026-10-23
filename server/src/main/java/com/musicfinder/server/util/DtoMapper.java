@@ -2,10 +2,8 @@ package com.musicfinder.server.util;
 
 import java.util.List;
 
-import com.musicfinder.server.model.Artists;
-import com.musicfinder.server.model.Songs;
-import com.musicfinder.shared.response.payload.ArtistData;
-import com.musicfinder.shared.response.payload.SongData;
+import com.musicfinder.server.model.*;
+import com.musicfinder.shared.response.payload.*;
 
 // Đổi Entity (model của DB) sang DTO (payload gửi cho Client).
 // Dùng chung cho StatisticsService, ArtistService và sau này là SearchService, PlaylistService.
@@ -33,5 +31,13 @@ public class DtoMapper {
                 a.getBio(),
                 a.getImageUrl(),
                 a.getSearchCount());
+    }
+
+    public static UserData toUserData(Users a) {
+        return new UserData(
+                a.getUsername(),
+                a.getFullName(),
+                a.getEmail(),
+                a.getAvatarUrl());
     }
 }

@@ -3,14 +3,19 @@ package com.musicfinder.server.handler;
 import java.util.Optional;
 
 import com.musicfinder.server.service.ArtistService;
+import com.musicfinder.server.service.AuthService;
 import com.musicfinder.server.service.HistoryService;
 import com.musicfinder.server.service.StatisticsService;
 import com.musicfinder.shared.enums.Status;
 import com.musicfinder.shared.request.Request;
 import com.musicfinder.shared.request.payload.ArtistPayload;
+import com.musicfinder.shared.request.payload.EditProfilePayload;
+import com.musicfinder.shared.request.payload.LoginPayload;
+import com.musicfinder.shared.request.payload.RegisterPayload;
 import com.musicfinder.shared.request.payload.RemoveRowSearchHistory;
 import com.musicfinder.shared.request.payload.StatisticsPayload;
 import com.musicfinder.shared.response.Response;
+import com.musicfinder.shared.response.payload.UserData;
 import com.musicfinder.shared.response.payload.ViewArtistDetailData;
 import com.musicfinder.shared.response.payload.ViewArtistSongsData;
 
@@ -21,6 +26,7 @@ public class RequestDispatcher {
     private final StatisticsService statisticsService = new StatisticsService();
     private final ArtistService artistService = new ArtistService();
     private final HistoryService historyService = new HistoryService();
+    private final AuthService authService = new AuthService();
 
     public Response handle(String json) {
         return handle(json, null);
@@ -44,7 +50,30 @@ public class RequestDispatcher {
             switch (request.getAction()) {
                 case PING:
                     return Response.success(request, "PONG");
-
+                // ======= Xác thực ========
+                case REGISTER: {
+                    RegisterPayload payload = request.dataAs(RegisterPayload.class);
+                    UserData data = authService.register(payload);
+                    return Response.success(request, data);
+                }
+                case LOGIN: {
+                    LoginPayload payload = request.dataAs(LoginPayload.class);
+                    UserData data = authService.login(payload);
+                    return Response.success(request, data);
+                }
+                case GET_PROFILE: {
+                    // Tạm thời lấy username từ field hoặc session
+                    String username = request.getData().path("username").asText("");
+                    UserData data = authService.getProfile(username);
+                    return Response.success(request, data);
+                }
+                case UPDATE_PROFILE: {
+                    String username = request.getData().path("username").asText("");
+                    EditProfilePayload payload = request.dataAs(EditProfilePayload.class);
+                    UserData data = authService.updateProfile(username, payload);
+                    return Response.success(request, data);
+                }
+                
                 // ===== Thống kê =====
                 case GET_TOP_SONGS:
                     return Response.success(request, statisticsService.getTopSongs(readLimit(request)));

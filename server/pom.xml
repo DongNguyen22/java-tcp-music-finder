@@ -30,6 +30,12 @@
 </build>
 
     <dependencies>
+        <!-- Bcrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
         <!-- Shared DTOs + request/response protocol -->
         <dependency>
             <groupId>com.musicfinder</groupId>
