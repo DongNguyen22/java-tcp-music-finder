@@ -1,11 +1,10 @@
 package com.musicfinder.server.service;
 
-import org.postgresql.util.PasswordUtil;
-
 import com.musicfinder.server.model.Users;
 import com.musicfinder.server.repository.UserRepository;
 import com.musicfinder.server.util.PasswordHash;
 import com.musicfinder.server.util.DtoMapper;
+import com.musicfinder.shared.request.payload.ChangePasswordProfilePayload;
 import com.musicfinder.shared.request.payload.EditProfilePayload;
 import com.musicfinder.shared.request.payload.LoginPayload;
 import com.musicfinder.shared.request.payload.RegisterPayload;
@@ -88,8 +87,8 @@ public class AuthService {
     public UserData updateProfile(String username, EditProfilePayload payload) {
         Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại" + username));
-        if (payload.fullName() != null || !payload.fullName().isBlank()) {
-            user.setFullName(username.trim());
+        if (payload.fullName() != null && !payload.fullName().isBlank()) {
+            user.setFullName(payload.fullName().trim());
         }
         if (payload.email() != null || !payload.email().isBlank()) {
             String newEmail = payload.email();
@@ -102,6 +101,23 @@ public class AuthService {
         }
         userRepository.update(user);
         return DtoMapper.toUserData(user);
-
     }
+
+    // Đổi mật khẩu
+    public boolean changePassword(String username, ChangePasswordProfilePayload payload) {
+        String newPassword = payload.password();
+        if (newPassword == null || newPassword.trim().length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự!");
+        }
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng " + username));
+        String newHash = PasswordHash.hashPassword(newPassword.trim());
+
+        // cập nhật vào DB
+        boolean updated = userRepository.updatePassword(user.getUserId(), newHash);
+        if (updated)
+            log.info("Người dùng [{}] đã đổi mật khẩu thành công ", username);
+        return updated;
+    }
+
 }

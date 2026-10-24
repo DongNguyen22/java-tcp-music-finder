@@ -74,7 +74,7 @@ public class ArtistRepository {
     // Tìm kiếm nghệ sĩ theo tên
     public List<Artists> searchByName(String name, int limit) {
         List<Artists> artists = new ArrayList<>();
-        String sql = "SELECT * FROM ARTISTS WHERE name LIKE ? LIMIT ?";
+        String sql = "SELECT * FROM ARTISTS WHERE normalized_name LIKE ? LIMIT ?";
         try (Connection conn = DatabaseConfig.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             String normalizedName = TextNormalizer.normalize(name);

@@ -9,6 +9,7 @@ import com.musicfinder.server.service.StatisticsService;
 import com.musicfinder.shared.enums.Status;
 import com.musicfinder.shared.request.Request;
 import com.musicfinder.shared.request.payload.ArtistPayload;
+import com.musicfinder.shared.request.payload.ChangePasswordProfilePayload;
 import com.musicfinder.shared.request.payload.EditProfilePayload;
 import com.musicfinder.shared.request.payload.LoginPayload;
 import com.musicfinder.shared.request.payload.RegisterPayload;
@@ -50,7 +51,8 @@ public class RequestDispatcher {
             switch (request.getAction()) {
                 case PING:
                     return Response.success(request, "PONG");
-                // ======= Xác thực ========
+
+                // ======= AUTH ========
                 case REGISTER: {
                     RegisterPayload payload = request.dataAs(RegisterPayload.class);
                     UserData data = authService.register(payload);
@@ -73,7 +75,13 @@ public class RequestDispatcher {
                     UserData data = authService.updateProfile(username, payload);
                     return Response.success(request, data);
                 }
-                
+                case CHANGE_PASSWORD: {
+                    String username = request.getData().path("username").asText("");
+                    ChangePasswordProfilePayload payload = request.dataAs(ChangePasswordProfilePayload.class);
+                    authService.changePassword(username, payload);
+                    return Response.success(request, "Đổi mật khẩu thành công");
+                }
+
                 // ===== Thống kê =====
                 case GET_TOP_SONGS:
                     return Response.success(request, statisticsService.getTopSongs(readLimit(request)));

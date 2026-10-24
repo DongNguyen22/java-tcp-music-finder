@@ -49,7 +49,8 @@ public class ProfileController {
     @FXML
     private void handleChangePassword() throws IOException {
         // ChangePasswordProfilePayload payload = new ChangePasswordProfilePayload();
-        Request request = Request.of(Action.UPDATE_PROFILE, null);
+        Request request = Request.of(Action.UPDATE_PROFILE, null); //đã có bổ xung thêm actions là CHANGE_PASSWORD 
+        //có thể thay đổi
         ClientConnection.getInstance().send(request, response -> {
             // UI UPDATE LATER
         });
